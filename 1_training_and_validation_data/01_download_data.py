@@ -90,9 +90,3 @@ with open(download_dir+"dataset_xeno.csv", 'wb') as csvfile:
         writer.writerow(row)
 
 print "Dataset saved!"
-
-
-# In[ ]:
-
-
-
