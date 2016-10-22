@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[1]:
-
 import pickle
 from pydub import AudioSegment
 import datetime
@@ -15,7 +10,6 @@ dataset_dir = "../data/"
 
 with open(dataset_dir + "dataset.pickle", "rb") as datafile:
     dataset = pickle.load(datafile)
-
 
 # In[2]:
 
