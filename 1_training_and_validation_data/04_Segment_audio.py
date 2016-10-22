@@ -156,17 +156,77 @@ def get_wav_info(wav_file):
     frame_rate = wav.getframerate()
     wav.close()
     return sound_info, frame_rate
- 
+
+
+def denoise(file):
+    signal, fs = get_wav_info(file)
+    print len(signal)
+    spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
+    spectogram = np.array(spectogram)
+    spectogram = spectogram.transpose()
+
+    spec = spectogram[:128]
+
+    filtered = np.zeros(np.shape(spec))
+    i_i = 0
+    for i in spec:
+        r_mean = i.mean()
+        c_mean = spec[:, i_i].mean()
+        j_i = 0
+        for j in i:
+            if j > 2.5 * r_mean and j > 2.5 * c_mean:
+                filtered[i_i, j_i] = 1
+            else:
+                filtered[i_i, j_i] = 0
+            j_i += 1
+        i_i += 1
+    label = []
+    label2 = np.zeros(np.shape(filtered)[1])
+    for i in range(np.shape(filtered)[1]):
+        if max(filtered[:, i]) == 1:
+            # label.append(1)
+            label2[i] = 1
+            if i > 0:
+                label2[i - 1] = 1
+                # label2[i-2] = 1
+
+                label2[i + 1] = 1
+                # label2[i+2] = 1
+
+        else:
+            # label.append(0)
+            label2[i] = 0
+    # for i in
+    # cleaning time
+    # sig_len = len(signal)
+    # f_len = shape(filtered)[1]
+    # win_size = sig_len/f_len + 1
+    # last_win = sig_len - (f_len-1)*win_size
+    cleaned_signal = np.zeros((np.shape(filtered)[0], 1))
+    for i in range(len(label2) - 1):
+        if label2[i] == 1:
+            cleaned_signal = np.append(cleaned_signal, spec[:, i].reshape((np.shape(filtered)[0], 1)), axis=1)
+
+    return cleaned_signal
+
+
+
 ###############################
 ## Create the Spectrograms
 ###############################  
 print strftime("%a, %d %b %Y %H:%M:%S +0000", localtime())  
 for rec in recordings:
     fname = rec[1]
-    signal, fs = get_wav_info("{0}{1}.wav".format(wav_folder, rec[1]))
-    spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
+    #signal, fs = get_wav_info("{0}{1}.wav".format(wav_folder, rec[1]))
+    #spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
 
-    segments = get_segments(fname, spectogram)
+    cleaned_signal = denoise("{0}{1}.wav".format(wav_folder, rec[1]))
+    segments = []
+    hop_size = cleaned_signal.shape[0]/2
+    for i in range(np.floor(cleaned_signal.shape[1]/hop_size)):
+        print "{0}:{1}".format(i*hop_size, i*hop_size+cleaned_signal.shape)
+        segments.append(cleaned_signal[:, i*hop_size:i*hop_size+cleaned_signal.shape[0]])
+    #segments = get_segments(fname, spectogram)
     print fname + " " + str(np.array(segments).shape)
     with open(segments_folder + fname + ".pickle", 'wb') as f:
         pickle.dump(segments, f, protocol=-1)
