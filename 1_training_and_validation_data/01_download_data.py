@@ -1,15 +1,8 @@
-
-# coding: utf-8
-
-# ### Get JSON data about the Estonian recordings
-
-# In[1]:
-
 import json
 import urllib2
 
 # Species are currently handpicked from PlutoF 
-species_set = ['Sylvia_borin', 'Dendrocopos_major', 'Chloris_chloris', 'Phoenicurus_phoenicurus', 'Sylvia_curruca']
+species_set = ['Parus_major', 'Fringilla_coelebs', 'Turdus_merula', 'Emberiza_citrinella', 'Chloris_chloris', 'Apus_apus', 'Phoenicurus_phoenicurus', 'Locustella_fluviatilis', 'Phylloscopus_sibilatrix', 'Dendrocopos_major']
 
 
 # ### JSON for all the species recordings
