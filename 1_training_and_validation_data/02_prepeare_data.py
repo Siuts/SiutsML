@@ -1,10 +1,3 @@
-
-# coding: utf-8
-
-# ## Load data
-
-# In[1]:
-
 import pickle
 dataset_dir = "../data/"
 with open(dataset_dir + "dataset_xeno.pickle", "rb") as datafile:
@@ -61,10 +54,6 @@ for rec in quality_recordings:
 print "Data list created"
 print "Recordings: " + str(len(data))
 
-
-# ## Save data
-
-# In[7]:
 
 import pickle
 pickle.dump(data, open(dataset_dir + "dataset.pickle", "wb" ))

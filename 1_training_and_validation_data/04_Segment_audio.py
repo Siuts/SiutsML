@@ -1,10 +1,3 @@
-
-# coding: utf-8
-
-# ## Load data and one-hot encoded labels
-
-# In[44]:
-
 import numpy as np
 import pandas as pd
 import scipy as sp
@@ -21,6 +14,7 @@ import matplotlib.patches as patches
 from os import listdir
 from os.path import isfile, join
 import scipy
+import os
 
 ###########################
 # Folder Name Setting
@@ -32,8 +26,6 @@ num_species = 5
 
 recordings = pickle.load(open(folder + "dataset.pickle", "rb"))
 
-
-# In[49]:
 
 FFT_FRAME_SIZE = 512
 FFT_FRAME_RES = 256
@@ -79,7 +71,7 @@ def get_segments(fname, spectogram):
         plot.imshow(spectogram)
         plot.axis('off')
         
-	not_allowed_centers_list = []
+    not_allowed_centers_list = []
     for current_segment_id in range(1,num_seg+1):
         current_segment = (labeled_segments == current_segment_id)*1
         xr = current_segment.max(axis =  1)
@@ -106,8 +98,8 @@ def get_segments(fname, spectogram):
         xr_max = xr_center + FFT_FRAME_RES/2
         
         if (xr_min >= 0 and xr_max <= len(spectogram) and xr_center not in not_allowed_centers_list):
-        	new_not_allowed_centers = range(xr_center-FFT_FRAME_RES/4, xr_center+FFT_FRAME_RES/4)
-        	not_allowed_centers_list = not_allowed_centers_list + new_not_allowed_centers
+            new_not_allowed_centers = range(xr_center-FFT_FRAME_RES/4, xr_center+FFT_FRAME_RES/4)
+            not_allowed_centers_list = not_allowed_centers_list + new_not_allowed_centers
             yr_min = 0
             yr_max = FFT_FRAME_RES
 
@@ -214,14 +206,31 @@ def denoise(file):
 ###############################
 ## Create the Spectrograms
 ###############################  
+counter = 0
 print strftime("%a, %d %b %Y %H:%M:%S +0000", localtime())  
 for rec in recordings:
     fname = rec[1]
+    pickle_path = segments_folder + fname + ".pickle"
+    if (not os.path.isfile(pickle_path)):
+        wav_path = "{0}{1}.wav".format(wav_folder, rec[1])
+        if (os.path.isfile(wav_path)):
+            cleaned_signal = denoise(wav_path)
+            segments = []
+            segments = []
+            hop_size = cleaned_signal.shape[0] / 2
+            for i in range(int(np.floor(cleaned_signal.shape[1] / hop_size - 1))):
+                segments.append(cleaned_signal[:, i * hop_size:i * hop_size + cleaned_signal.shape[0]])
+            print fname + " " + str(np.array(segments).shape)
+            with open(segments_folder + fname + ".pickle", 'wb') as f:
+                pickle.dump(segments, f, protocol=-1)
+    if (counter % 100 == 0):
+        print "{0} - {1}".format(counter, strftime("%a, %d %b %Y %H:%M:%S +0000", localtime()))
+    counter += 1
+
     #signal, fs = get_wav_info("{0}{1}.wav".format(wav_folder, rec[1]))
     #spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
 
-    cleaned_signal = denoise("{0}{1}.wav".format(wav_folder, rec[1]))
-    segments = []
+
     hop_size = cleaned_signal.shape[0]/2
     for i in range(np.floor(cleaned_signal.shape[1]/hop_size)):
         print "{0}:{1}".format(i*hop_size, i*hop_size+cleaned_signal.shape)
