@@ -19,7 +19,7 @@ def find_biggest_in_dir(directory):
             name = fname
     return name
 
-uncut_dir = "../data/segments/1/training/"
+uncut_dir = "../data/segments/1/training_joined/"
 save_dir = "../data/dataset/1/training/"
 
 
