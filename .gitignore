@@ -1,4 +1,11 @@
-data/
+*.wav
+*.pickle
+*.mp3
+*.m4a
+*.mp4
+*.ogg
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
