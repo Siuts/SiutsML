@@ -78,7 +78,8 @@ def get_segments(fname, spectogram):
         plot = fig.add_subplot(111, aspect='equal')
         plot.imshow(spectogram)
         plot.axis('off')
-
+        
+	not_allowed_centers_list = []
     for current_segment_id in range(1,num_seg+1):
         current_segment = (labeled_segments == current_segment_id)*1
         xr = current_segment.max(axis =  1)
@@ -103,7 +104,10 @@ def get_segments(fname, spectogram):
         xr_center = xr_max - xr_width/2
         xr_min = xr_center - FFT_FRAME_RES/2
         xr_max = xr_center + FFT_FRAME_RES/2
-        if (xr_min >= 0 and xr_max <= len(spectogram)):
+        
+        if (xr_min >= 0 and xr_max <= len(spectogram) and xr_center not in not_allowed_centers_list):
+        	new_not_allowed_centers = range(xr_center-FFT_FRAME_RES/4, xr_center+FFT_FRAME_RES/4)
+        	not_allowed_centers_list = not_allowed_centers_list + new_not_allowed_centers
             yr_min = 0
             yr_max = FFT_FRAME_RES
 
