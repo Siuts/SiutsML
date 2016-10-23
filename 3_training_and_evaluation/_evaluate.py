@@ -14,9 +14,9 @@ from tensorflow.python.platform import gfile
 from sklearn.metrics import confusion_matrix
 import numpy as np
 
-num_classes = 10
+num_classes = 32
 test_batch = 100
-dataset_loc = "../data/dataset/1/testing/"
+dataset_loc = "../data/datasets/1/testing/"
 
 with open('../data/labels.pickle', 'rb') as f:
     labels_dict = pickle.load(f)
@@ -56,7 +56,7 @@ with tf.Session() as persisted_sess:
         graph_def.ParseFromString(f.read())
         persisted_sess.graph.as_default()
         tf_test_dataset = tf.placeholder(tf.float32, shape=(test_batch, 64, 64, 1))
-        test_predictions_op = tf.import_graph_def(graph_def, 
+        test_predictions_op = tf.import_graph_def(graph_def, name='', 
                                                 input_map={"test_dataset_placeholder:0": tf_test_dataset},
                                                 return_elements = ['sm_test:0'])
 

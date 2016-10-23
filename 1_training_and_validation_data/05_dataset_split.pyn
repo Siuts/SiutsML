@@ -5,7 +5,6 @@ from os.path import isfile, join
 from sklearn.cross_validation import train_test_split
 import numpy as np
 from sklearn.preprocessing import scale
-import random
 
 pickles_dir = "../data/segments/1/training/"
 
@@ -71,35 +70,34 @@ all_segments = np.empty
 all_labels = np.empty
 all_rec_Ids = np.empty
 
-if not isfile(validation_data_fname):
-    for rec in files:
-        fname = rec[1]
-        label = rec[2]
-        rec_id = rec[0]
-        rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
-        if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
-            processed_segments = scale_and_resize_segments(rec_segments)
-            if counter == 0:
-                all_segments = processed_segments
-                all_labels = labels
-                all_rec_Ids = rec_ids
-            else:
-                all_segments = np.vstack((all_segments, processed_segments))
-                all_labels = np.vstack((all_labels, labels))
-                all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
+for rec in files:
+    fname = rec[1]
+    label = rec[2]
+    rec_id = rec[0]
+    rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
+    if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
+        processed_segments = scale_and_resize_segments(rec_segments)
+        if counter == 0:
+            all_segments = processed_segments
+            all_labels = labels
+            all_rec_Ids = rec_ids
+        else:
+            all_segments = np.vstack((all_segments, processed_segments))
+            all_labels = np.vstack((all_labels, labels))
+            all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
 
-        if counter % 25 == 0:
-            print str(counter) + "/" + str(len(files))
-        counter += 1
+    if counter % 25 == 0:
+        print str(counter) + "/" + str(len(files))
+    counter += 1
 
-    with open(validation_data_fname, 'wb') as f:
-        pickle.dump(all_segments, f, protocol=-1)
+with open(validation_data_fname, 'wb') as f:
+    pickle.dump(all_segments, f, protocol=-1)
 
-    with open(validation_labels_fname, 'wb') as f:
-        pickle.dump(all_labels, f, protocol=-1)
+with open(validation_labels_fname, 'wb') as f:
+    pickle.dump(all_labels, f, protocol=-1)
 
-    with open(validation_rec_Ids_fname, 'wb') as f:
-        pickle.dump(all_rec_Ids, f, protocol=-1)
+with open(validation_rec_Ids_fname, 'wb') as f:
+    pickle.dump(all_rec_Ids, f, protocol=-1)
 print " "
 
 
@@ -109,12 +107,10 @@ print " "
 ## with open('../../labels_reverse.pickle', 'rb') as f:
 #     t = pickle.load(f)
 # print dataset
-save_dir = "../data/dataset/1/training/"
-max_segments_in_file = 4096
-max_segments = 73000
+
 dataset_name = "training"
 files_set = train_files
-for specimen in species[:2]:
+for specimen in species:
     # list of rec_ids, filenames and labels from training/validation set and corresponding to specific species
     specimen_files = [x for x in dataset if x[1].split("-")[0] == specimen and x[1] in files_set]
     all_segments = np.empty
@@ -149,35 +145,10 @@ for specimen in species[:2]:
 
             if counter % 25 == 0:
                 print str(counter) + "/" + str(len(specimen_files))
-         
-   
-
-
-
-
-
+            
         print all_segments.shape
-
-        training_data = all_segments
-        random.shuffle(training_data)
-        nr_samples = len(training_data)
-        if (nr_samples < max_segments):
-            data_to_append = np.copy(training_data)
-            for j in range(int(np.floor(max_segments/nr_samples))-1):
-                training_data = np.concatenate((training_data, data_to_append))
-            training_data = np.concatenate((training_data, data_to_append[:(max_segments-len(training_data))]))
-        nr_of_files = int(np.ceil(float(max_segments)/max_segments_in_file))
-        for i in range(nr_of_files):
-            with open("{0}/{1}-training_{2}.pickle".format(save_dir, specimen, i), 'wb') as f:
-                pickle.dump(training_data[i*max_segments_in_file:(i+1)*max_segments_in_file], f, protocol=-1)
-        print specimen
-
-
-
-
-
-        #with open(data_fname, 'wb') as f:
-        #    pickle.dump(all_segments, f, protocol=-1)
+        with open(data_fname, 'wb') as f:
+            pickle.dump(all_segments, f, protocol=-1)
 
         with open(labels_fname, 'wb') as f:
             pickle.dump(all_labels, f, protocol=-1)

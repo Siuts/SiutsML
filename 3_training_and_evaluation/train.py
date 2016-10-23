@@ -8,16 +8,16 @@ import sys
 
 start = time.time()
 
-num_epochs = 2
+num_epochs = 2 
 samples_in_file = 4096
-num_files = 11
+num_files = 17
 
 dataset_loc = '../data/dataset/1/'
 test_dataset_length = 100
 
 
 image_size = 64
-num_labels = 5
+num_labels = 10
 
 batch_size = 128
 

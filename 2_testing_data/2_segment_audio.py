@@ -15,18 +15,17 @@ from os import listdir
 from os.path import isfile, join
 import scipy
 import os
-import random
 
 ###########################
 # Folder Name Setting
 ###########################
 folder = '../data/'
-segments_folder = folder + 'segments/1/training/'
-wav_folder = folder + "wavs/"
-num_species = 5
+segments_folder = folder + 'segments/1/testing/'
+wav_folder = folder + "test_wavs/"
+num_species = 10
 
-recordings = pickle.load(open(folder + "dataset.pickle", "rb"))
-random.shuffle(recordings)
+recordings = pickle.load(open(folder + "test_dataset.pickle", "rb"))
+
 
 FFT_FRAME_SIZE = 512
 FFT_FRAME_RES = 256
@@ -183,28 +182,21 @@ def denoise(file):
             if i > 0:
                 label2[i - 1] = 1
                 # label2[i-2] = 1
-                if i < np.shape(filtered)[1]-1:
-                    #print "{i}".format()
+                if i < np.shape(filtered)[1] - 1:
+                    # print "{i}".format()
                     label2[i + 1] = 1
                     # label2[i+2] = 1
 
         else:
             # label.append(0)
             label2[i] = 0
-    # for i in
-    # cleaning time
-    # sig_len = len(signal)
-    # f_len = shape(filtered)[1]
-    # win_size = sig_len/f_len + 1
-    # last_win = sig_len - (f_len-1)*win_size
+
     cleaned_signal = np.zeros((np.shape(filtered)[0], 1))
     for i in range(len(label2) - 1):
         if label2[i] == 1:
             cleaned_signal = np.append(cleaned_signal, spec[:, i].reshape((np.shape(filtered)[0], 1)), axis=1)
 
     return cleaned_signal
-
-
 
 ###############################
 ## Create the Spectrograms
@@ -213,12 +205,10 @@ counter = 0
 print strftime("%a, %d %b %Y %H:%M:%S +0000", localtime())  
 for rec in recordings:
     fname = rec[1]
-    #print fname
     pickle_path = segments_folder + fname + ".pickle"
     if (not os.path.isfile(pickle_path)):
         wav_path = "{0}{1}.wav".format(wav_folder, rec[1])
         if (os.path.isfile(wav_path)):
-            #print wav_path
             cleaned_signal = denoise(wav_path)
             if len(cleaned_signal) > 0:
                 segments = []
@@ -232,12 +222,10 @@ for rec in recordings:
                 #resized_segment = scipy.misc.imresize(subpic, (SEGMENT_SIZE, SEGMENT_SIZE), interp='nearest')
                 with open(segments_folder + fname + ".pickle", 'wb') as f:
                     pickle.dump(segments, f, protocol=-1)
-    if (counter % 100 == 0):
-        print "{0} - {1}".format(counter, strftime("%a, %d %b %Y %H:%M:%S +0000", localtime()))
-    counter += 1
 
-    #signal, fs = get_wav_info("{0}{1}.wav".format(wav_folder, rec[1]))
-    #spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
+    if (counter % 100 == 0):
+        print "{0} - {1}".format(counter, strftime("%a, %d %b %Y %H:%M:%S +0000", localtime())) 
+    counter += 1
 print strftime("%a, %d %b %Y %H:%M:%S +0000", localtime())
 # print 
 # print "Segments generated"

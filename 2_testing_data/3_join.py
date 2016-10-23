@@ -12,11 +12,11 @@ import numpy as np
 from sklearn.preprocessing import scale
 import json
 
-pickles_dir = "../data/segments/1/testing_json/"
-num_labels = 32
+pickles_dir = "../data/segments/1/testing/"
+num_labels = 10
 image_size = 64
 
-def load_pickled_segments_from_file(filename, label, recId):
+def load_pickled_segments_from_file_(filename, label, recId):
     data = load_java_segments_from_file(filename)
     if len(data) == 0:
         return np.empty([0]), np.empty([0]), np.empty([0])
@@ -28,6 +28,24 @@ def load_pickled_segments_from_file(filename, label, recId):
         rec_Ids.append(recId)
         segs = data
     return np.array(segs), reformat(np.array(labels)), np.array(rec_Ids)
+
+
+def load_pickled_segments_from_file(filename, label, recId):
+    with open(filename, 'rb') as f:
+        data = pickle.load(f)
+    if len(data) == 0:
+        return np.empty([0]), np.empty([0]), np.empty([0])
+    #print filename + " " + str(len(data))
+    labels = []
+    rec_Ids = []
+    for _ in data:
+        labels.append(label)
+        rec_Ids.append(recId)
+        segs = data
+    return np.array(segs), reformat(np.array(labels)), np.array(rec_Ids)
+
+
+
 
 def load_java_segments_from_file(filename):
     with open(filename) as data_file:    
@@ -61,7 +79,7 @@ print len(test_files)
 
 # In[3]:
 
-print dataset
+#print dataset
 
 
 # # Create testing set
@@ -81,7 +99,7 @@ for rec in dataset:
     fname = rec[1]
     label = rec[2]
     rec_id = rec[0]
-    rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".json", label, rec_id)
+    rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
     if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
         processed_segments = scale_and_resize_segments(rec_segments)
         if counter == 0:
@@ -97,9 +115,9 @@ for rec in dataset:
         print str(counter) + "/" + str(len(test_files))
 
 
-data_fname = "../data/datasets/1/testing/testing_data.pickle"
-labels_fname = "../data/datasets/1/testing/testing_labels.pickle"
-rec_Ids_fname = "../data/datasets/1/testing/testing_rec_ids.pickle"
+data_fname = "../data/dataset/1/testing/testing_data.pickle"
+labels_fname = "../data/dataset/1/testing/testing_labels.pickle"
+rec_Ids_fname = "../data/dataset/1/testing/testing_rec_ids.pickle"
     
 with open(data_fname, 'wb') as f:
     pickle.dump(all_segments, f, protocol=-1)

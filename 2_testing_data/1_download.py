@@ -12,9 +12,6 @@ download_dir = "../data/m4as"
 dataset_dir = "../data/"
 files_url_prefix = "https://files.plutof.ut.ee/"
 
-
-# In[27]:
-
 with open("../data/labels.pickle", 'rb') as f:
     labels_dict = pickle.load(f)
 print labels_dict
@@ -23,11 +20,7 @@ species = ["{0} {1}".format(x.split('_')[0], x.split('_')[1]) for x in labels_di
 print species
 
 
-# In[28]:
-
-
-
-taxon_ids = {0: 51922, 1: 43289, 2: 102321, 3: 102326, 4: 88708}
+taxon_ids = {0: 86560, 1: 60814, 2: 107910, 3: 51922, 4: 56209, 5: 43289, 6: 88708, 7: 89511, 8: 71908, 9: 36397}
 
 taxon_url_temp = "https://api.plutof.ut.ee/v1/taxonomy/taxonnodes/{0}/"
 taxon_urls = { taxon_url_temp.format(v) : k for k, v in taxon_ids.items() }
@@ -57,7 +50,7 @@ for page_nr in range(1, 17):
                 file_loc = files_url_prefix + audio_data["public_url"]
 
                 ext = file_loc.split(".")[-1]
-                print "{0} {1} {2}".format(counter, file_loc, ext)
+                #print "{0} {1} {2}".format(counter, file_loc, ext)
                 sp_name = labels_dict[taxon_urls[taxon_url]]
                 fname = "{}_{:05d}".format(sp_name, audio_data["id"])
                 urllib.urlretrieve(file_loc, "{}/{}.{}".format(download_dir, fname, ext))
@@ -103,5 +96,5 @@ for rec in recordings:
 
 # In[45]:
 
-print errors[0][2]
+#print errors[0][2]
 
