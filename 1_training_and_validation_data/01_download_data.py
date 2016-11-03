@@ -2,7 +2,11 @@ import json
 import urllib2
 
 # Species are currently handpicked from PlutoF 
-species_set = ['Parus_major', 'Fringilla_coelebs', 'Turdus_merula', 'Emberiza_citrinella', 'Chloris_chloris', 'Apus_apus', 'Phoenicurus_phoenicurus', 'Locustella_fluviatilis', 'Phylloscopus_sibilatrix', 'Dendrocopos_major']
+species_set = ['Parus_major', 'Coloeus_monedula', 'Corvus_cornix', 'Fringilla_coelebs',
+               'Erithacus_rubecula', 'Phylloscopus_collybita', 'Turdus_merula', 'Cyanistes_caeruleus',
+               'Emberiza_citrinella', 'Chloris_chloris', 'Turdus_philomelos', 'Phylloscopus_trochilus',
+               'Sylvia_borin', 'Apus_apus', 'Passer_domesticus', 'Luscinia_luscinia', 'Sylvia_atricapilla',
+               'Ficedula_hypoleuca', 'Sylvia_communis', 'Carpodacus_erythrinus']
 
 
 # ### JSON for all the species recordings
@@ -82,6 +86,7 @@ for sp_recordings in all_recordings:
         dataset.append(dataset_row)
 
 pickle.dump(dataset, open(download_dir+"dataset_xeno.pickle", "wb" ))
+pickle.dump(species_set, open(download_dir+"species_list.pickle", "wb" ))
 
 with open(download_dir+"dataset_xeno.csv", 'wb') as csvfile:
     writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_ALL)
