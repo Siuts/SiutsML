@@ -63,7 +63,7 @@ with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
     max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
-train_files, valid_files = train_test_split(recordings, test_size=0.1, random_state=23)
+train_files, valid_files = train_test_split(recordings, test_size=0.02, random_state=23)
 species = list(set([x.split("-")[0] for x in train_files]))
 
 print "Total amount of recordings: {0}".format(len(recordings))
@@ -95,9 +95,9 @@ if not isfile(validation_data_fname):
                 all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
             specimen = fname.split("-")[0]
             if specimen in validation_segments_count:
-                validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
+                validation_segments_count[specimen] = validation_segments_count[specimen] + processed_segments.shape[0]
             else:
-                validation_segments_count[specimen] = all_segments.shape[0]
+                validation_segments_count[specimen] = processed_segments.shape[0]
         if counter % 25 == 0:
             print str(counter) + "/" + str(len(validation_files))
         counter += 1
