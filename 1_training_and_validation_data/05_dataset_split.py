@@ -127,13 +127,15 @@ if not isfile(validation_data_fname):
 
             specimen = fname.split("-")[0]
             if specimen in validation_segments_count:
-                validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
+                validation_segments_count[specimen] = validation_segments_count[specimen] + len(all_segments)
             else:
-                validation_segments_count[specimen] = all_segments.shape[0]
+                validation_segments_count[specimen] = len(all_segments)
         if counter % 25 == 0:
             print str(counter) + "/" + str(len(validation_files))
         counter += 1
-
+    all_segments = np.array(all_segments)
+    all_labels = np.array(all_labels)
+    all_rec_Ids = np.array(all_rec_Ids)
     with open(validation_data_fname, 'wb') as f:
         pickle.dump(all_segments, f, protocol=-1)
 
