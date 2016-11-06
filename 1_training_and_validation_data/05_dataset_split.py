@@ -63,31 +63,22 @@ with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
     max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
-train_files, valid_files = train_test_split(recordings, test_size = 0.1, random_state=23)
+train_files, valid_files = train_test_split(recordings, test_size=0.1, random_state=23)
 species = list(set([x.split("-")[0] for x in train_files]))
 
-
-# In[ ]:
-
-print len(recordings)
-print len(train_files)
-
-
-# # Create validation set
-
-# In[5]:
-
+print "Total amount of recordings: {0}".format(len(recordings))
+print "Total amount of training files: {0}".format(len(train_files))
 
 counter = 0
 
 # list of rec_ids, filenames and labels from training/validation set and corresponding to specific species
-files = [x for x in dataset if x[1] in valid_files]
+validation_files = [x for x in dataset if x[1] in valid_files]
 all_segments = np.empty
 all_labels = np.empty
 all_rec_Ids = np.empty
-
+validation_segments_count = {}
 if not isfile(validation_data_fname):
-    for rec in files:
+    for rec in validation_files:
         fname = rec[1]
         label = rec[2]
         rec_id = rec[0]
@@ -102,9 +93,13 @@ if not isfile(validation_data_fname):
                 all_segments = np.vstack((all_segments, processed_segments))
                 all_labels = np.vstack((all_labels, labels))
                 all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
-
+            specimen = fname.split("-")[0]
+            if specimen in validation_segments_count:
+                validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
+            else:
+                validation_segments_count[specimen] = all_segments.shape[0]
         if counter % 25 == 0:
-            print str(counter) + "/" + str(len(files))
+            print str(counter) + "/" + str(len(validation_files))
         counter += 1
 
     with open(validation_data_fname, 'wb') as f:
@@ -115,7 +110,7 @@ if not isfile(validation_data_fname):
 
     with open(validation_rec_Ids_fname, 'wb') as f:
         pickle.dump(all_rec_Ids, f, protocol=-1)
-print " "
+print validation_segments_count
 
 
 
@@ -129,6 +124,7 @@ max_segments_in_file = 4096
 
 dataset_name = "training"
 files_set = train_files
+training_segments_count = {}
 for specimen in species:
     # list of rec_ids, filenames and labels from training/validation set and corresponding to specific species
     specimen_files = [x for x in dataset if x[1].split("-")[0] == specimen and x[1] in files_set]
@@ -178,7 +174,9 @@ for specimen in species:
         for i in range(nr_of_files):
             with open("{0}/{1}-training_{2}.pickle".format(save_dir, specimen, i), 'wb') as f:
                 pickle.dump(training_data[i*max_segments_in_file:(i+1)*max_segments_in_file], f, protocol=-1)
-        print specimen
+        print specimen + " saved"
+        training_segments_count[specimen] = training_data.shape[0]
+
 
 
 
@@ -194,4 +192,4 @@ for specimen in species:
             pickle.dump(all_rec_Ids, f, protocol=-1)
         print " "
 
-
+print training_segments_count
