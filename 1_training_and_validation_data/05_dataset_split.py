@@ -95,9 +95,9 @@ if not isfile(validation_data_fname):
                 all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
             specimen = fname.split("-")[0]
             if specimen in validation_segments_count:
-                validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
+                validation_segments_count[specimen] = validation_segments_count[specimen] + processed_segments.shape[0]
             else:
-                validation_segments_count[specimen] = all_segments.shape[0]
+                validation_segments_count[specimen] = processed_segments.shape[0]
         if counter % 25 == 0:
             print str(counter) + "/" + str(len(validation_files))
         counter += 1
@@ -119,12 +119,34 @@ print validation_segments_count
 ## with open('../../labels_reverse.pickle', 'rb') as f:
 #     t = pickle.load(f)
 # print dataset
+max_segments = 0
+species_segments_count = {}
+species_files_count = {}
+for specimen in species:
+    specimen_files = [x for x in dataset if x[1].split("-")[0] == specimen and x[1] in train_files]
+    species_files_count[specimen] = len(specimen_files)
+    for rec in specimen_files:
+        fname = rec[1]
+        with open(pickles_dir + fname + ".pickle", 'rb') as f:
+             segments = pickle.load(f)
+        species_segments_count = species_segments_count + len(segments)
+    if species_segments_count[specimen] > max:
+        max_segments = species_segments_count[specimen]
+print "Species files count"
+print species_files_count
+print ""
+
+print "Species segments count:"
+print species_segments_count
+print ""
+
+print "Max segments: " + str(max_segments)
+
 
 max_segments_in_file = 4096
 
 dataset_name = "training"
 files_set = train_files
-training_segments_count = {}
 for specimen in species:
     # list of rec_ids, filenames and labels from training/validation set and corresponding to specific species
     specimen_files = [x for x in dataset if x[1].split("-")[0] == specimen and x[1] in files_set]
@@ -175,7 +197,6 @@ for specimen in species:
             with open("{0}/{1}-training_{2}.pickle".format(save_dir, specimen, i), 'wb') as f:
                 pickle.dump(training_data[i*max_segments_in_file:(i+1)*max_segments_in_file], f, protocol=-1)
         print specimen + " saved"
-        training_segments_count[specimen] = training_data.shape[0]
 
 
 
@@ -191,5 +212,3 @@ for specimen in species:
         with open(rec_Ids_fname, 'wb') as f:
             pickle.dump(all_rec_Ids, f, protocol=-1)
         print " "
-
-print training_segments_count
