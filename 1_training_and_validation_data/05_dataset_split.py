@@ -63,7 +63,7 @@ with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
     max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
-train_files, valid_files = train_test_split(recordings, test_size=0.1, random_state=23)
+train_files, valid_files = train_test_split(recordings, test_size=0.02, random_state=23)
 species = list(set([x.split("-")[0] for x in train_files]))
 
 print "Total amount of recordings: {0}".format(len(recordings))
@@ -211,4 +211,3 @@ for specimen in species:
 
         with open(rec_Ids_fname, 'wb') as f:
             pickle.dump(all_rec_Ids, f, protocol=-1)
-        print " "
