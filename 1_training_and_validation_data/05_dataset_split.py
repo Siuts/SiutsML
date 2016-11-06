@@ -110,6 +110,10 @@ validation_segments_count = {}
 #
 #     with open(validation_rec_Ids_fname, 'wb') as f:
 #         pickle.dump(all_rec_Ids, f, protocol=-1)
+
+
+import time
+start_time = time.time()
 all_segments = []
 all_labels = []
 all_rec_Ids = []
@@ -144,7 +148,7 @@ if not isfile(validation_data_fname):
         pickle.dump(all_rec_Ids, f, protocol=-1)
 print validation_segments_count
 
-
+print("--- %s seconds ---" % (time.time() - start_time))
 
 # In[7]:
 
