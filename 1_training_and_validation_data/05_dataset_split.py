@@ -1,5 +1,4 @@
 import pickle
-import operator
 from os import listdir
 from os.path import isfile, join
 from sklearn.cross_validation import train_test_split
@@ -10,12 +9,13 @@ import random
 pickles_dir = "../data/segments/1/training/"
 
 joined_training_dir = "../data/segments/1/training_joined/"
+save_dir = "../data/dataset/1/training/"
 val_dir = "../data/dataset/1/validation/"
 validation_data_fname = val_dir + "validation_data.pickle"
 validation_labels_fname = val_dir +"validation_labels.pickle"
 validation_rec_Ids_fname = val_dir + "validation_rec_ids.pickle"
 
-num_labels = 10
+num_labels = 20
 image_size = 64
 
 def load_pickled_segments_from_file(filename, label, recId):
@@ -46,6 +46,20 @@ def reformat(labels):
 
 with open('../data/dataset.pickle', 'rb') as f:
     dataset = pickle.load(f)
+
+def find_biggest_in_dir(directory):
+    all_files = os.listdir(directory)
+    max_size = 0
+    name = ""
+    for fname in all_files:
+        size = os.path.getsize(directory + fname)
+        if size > max_size:
+            max_size = size
+            name = fname
+    return name
+
+with open(joined_training_dir + find_biggest_in_dir(joined_training_dir), 'rb') as f:
+    max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
 train_files, valid_files = train_test_split(recordings, test_size = 0.1, random_state=23)
@@ -109,12 +123,12 @@ print " "
 ## with open('../../labels_reverse.pickle', 'rb') as f:
 #     t = pickle.load(f)
 # print dataset
-save_dir = "../data/dataset/1/training/"
+
 max_segments_in_file = 4096
-max_segments = 73000
+
 dataset_name = "training"
 files_set = train_files
-for specimen in species[:2]:
+for specimen in species:
     # list of rec_ids, filenames and labels from training/validation set and corresponding to specific species
     specimen_files = [x for x in dataset if x[1].split("-")[0] == specimen and x[1] in files_set]
     all_segments = np.empty
@@ -149,13 +163,6 @@ for specimen in species[:2]:
 
             if counter % 25 == 0:
                 print str(counter) + "/" + str(len(specimen_files))
-         
-   
-
-
-
-
-
         print all_segments.shape
 
         training_data = all_segments
