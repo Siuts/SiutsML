@@ -77,6 +77,42 @@ all_segments = np.empty
 all_labels = np.empty
 all_rec_Ids = np.empty
 validation_segments_count = {}
+# if not isfile(validation_data_fname):
+#     for rec in validation_files:
+#         fname = rec[1]
+#         label = rec[2]
+#         rec_id = rec[0]
+#         rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
+#         if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
+#             processed_segments = scale_and_resize_segments(rec_segments)
+#             if counter == 0:
+#                 all_segments = processed_segments
+#                 all_labels = labels
+#                 all_rec_Ids = rec_ids
+#             else:
+#                 all_segments = np.vstack((all_segments, processed_segments))
+#                 all_labels = np.vstack((all_labels, labels))
+#                 all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
+#             specimen = fname.split("-")[0]
+#             if specimen in validation_segments_count:
+#                 validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
+#             else:
+#                 validation_segments_count[specimen] = all_segments.shape[0]
+#         if counter % 25 == 0:
+#             print str(counter) + "/" + str(len(validation_files))
+#         counter += 1
+#
+#     with open(validation_data_fname, 'wb') as f:
+#         pickle.dump(all_segments, f, protocol=-1)
+#
+#     with open(validation_labels_fname, 'wb') as f:
+#         pickle.dump(all_labels, f, protocol=-1)
+#
+#     with open(validation_rec_Ids_fname, 'wb') as f:
+#         pickle.dump(all_rec_Ids, f, protocol=-1)
+all_segments = []
+all_labels = []
+all_rec_Ids = []
 if not isfile(validation_data_fname):
     for rec in validation_files:
         fname = rec[1]
@@ -85,14 +121,10 @@ if not isfile(validation_data_fname):
         rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
         if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
             processed_segments = scale_and_resize_segments(rec_segments)
-            if counter == 0:
-                all_segments = processed_segments
-                all_labels = labels
-                all_rec_Ids = rec_ids
-            else:
-                all_segments = np.vstack((all_segments, processed_segments))
-                all_labels = np.vstack((all_labels, labels))
-                all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
+            all_segments = all_segments + processed_segments.tolist()
+            all_labels = all_labels + labels.tolist()
+            all_rec_Ids = all_rec_Ids + rec_ids.tolist()
+
             specimen = fname.split("-")[0]
             if specimen in validation_segments_count:
                 validation_segments_count[specimen] = validation_segments_count[specimen] + all_segments.shape[0]
