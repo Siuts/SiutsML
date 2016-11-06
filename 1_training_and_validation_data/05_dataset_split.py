@@ -1,4 +1,5 @@
 import pickle
+import os
 from os import listdir
 from os.path import isfile, join
 from sklearn.cross_validation import train_test_split
@@ -58,7 +59,7 @@ def find_biggest_in_dir(directory):
             name = fname
     return name
 
-with open(joined_training_dir + find_biggest_in_dir(joined_training_dir), 'rb') as f:
+with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
     max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
@@ -135,7 +136,7 @@ for specimen in species:
     all_labels = np.empty
     all_rec_Ids = np.empty
 
-    filepath_prefix = "{0}{1}_".format(joined_training_dir, specimen)
+    filepath_prefix = "{0}{1}_".format(pickles_dir, specimen)
     data_fname = filepath_prefix + "data.pickle"
     labels_fname = filepath_prefix + "labels.pickle"
     rec_Ids_fname = filepath_prefix + "rec_ids.pickle"
