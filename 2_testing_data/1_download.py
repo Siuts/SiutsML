@@ -18,9 +18,13 @@ print labels_dict
     
 species = ["{0} {1}".format(x.split('_')[0], x.split('_')[1]) for x in labels_dict.values()]
 print species
+#{0: 'Parus_major', 1: 'Fringilla_coelebs', 2: 'Turdus_merula', 3: 'Phylloscopus_collybita', 4: 'Sylvia_atricapilla', 5: 'Erithacus_rubecula',
+# 6: 'Turdus_philomelos', 7: 'Cyanistes_caeruleus', 8: 'Sylvia_communis', 9: 'Phylloscopus_trochilus', 10: 'Emberiza_citrinella', 11: 'Chloris_chloris',
+# 12: 'Passer_domesticus', 13: 'Sylvia_borin', 14: 'Luscinia_luscinia', 15: 'Ficedula_hypoleuca', 16: 'Carpodacus_erythrinus', 17: 'Coloeus_monedula',
+# 18: 'Corvus_cornix', 19: 'Apus_apus'}
 
-
-taxon_ids = {0: 86560, 1: 60814, 2: 107910, 3: 51922, 4: 56209, 5: 43289, 6: 88708, 7: 89511, 8: 71908, 9: 36397}
+taxon_ids = {0: 86560, 1: 60814, 2: 107910, 3: 89499, 4: 102319, 5: 57887, 6: 107914, 7: 86555, 8: 102323, 9: 89514, 10: 56209, 11: 43289,
+             12: 86608, 13: 102321, 14: 72325, 15: 60307, 16: 43434, 17: 48392, 18: 110936, 19: 36397}
 
 taxon_url_temp = "https://api.plutof.ut.ee/v1/taxonomy/taxonnodes/{0}/"
 taxon_urls = { taxon_url_temp.format(v) : k for k, v in taxon_ids.items() }
@@ -62,7 +66,6 @@ for page_nr in range(1, 17):
 
 # In[43]:
 
-print recordings[:5]
 with open("../data/test_dataset.pickle", 'wb') as f:
     pickle.dump(recordings, f, protocol=-1)
     
