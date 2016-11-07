@@ -149,7 +149,6 @@ def get_wav_info(wav_file):
     wav.close()
     return sound_info, frame_rate
 
-
 def denoise(file):
     signal, fs = get_wav_info(file)
     spectogram = abs(stft(signal, FFT_FRAME_SIZE, FFT_FRAME_RES))
@@ -158,8 +157,10 @@ def denoise(file):
 
     spec = spectogram[:128]
 
+    #print "Spectrogram size: " + str(spec.shape)
     filtered = np.zeros(np.shape(spec))
     i_i = 0
+    counter = 0
     for i in spec:
         r_mean = i.mean()
         if i_i >= np.shape(spec)[1]:
@@ -176,27 +177,43 @@ def denoise(file):
     label = []
     label2 = np.zeros(np.shape(filtered)[1])
     for i in range(np.shape(filtered)[1]):
+#        if counter % 10 == 0:
+#            print counter
+#        counter = counter + 1
         if max(filtered[:, i]) == 1:
             # label.append(1)
             label2[i] = 1
             if i > 0:
                 label2[i - 1] = 1
                 # label2[i-2] = 1
-                if i < np.shape(filtered)[1] - 1:
-                    # print "{i}".format()
+                if i < np.shape(filtered)[1]-1:
+                    #print "{i}".format()
                     label2[i + 1] = 1
                     # label2[i+2] = 1
 
         else:
             # label.append(0)
             label2[i] = 0
-
-    cleaned_signal = np.zeros((np.shape(filtered)[0], 1))
+    # for i in
+    # cleaning time
+    # sig_len = len(signal)
+    # f_len = shape(filtered)[1]
+    # win_size = sig_len/f_len + 1
+    # last_win = sig_len - (f_len-1)*win_size
+    #cleaned_signal2 = np.zeros((np.shape(filtered)[0], 1))
+    cleaned_signal = []
     for i in range(len(label2) - 1):
-        if label2[i] == 1:
-            cleaned_signal = np.append(cleaned_signal, spec[:, i].reshape((np.shape(filtered)[0], 1)), axis=1)
+        #if counter % 1000 == 0:
+        #    print counter
+        #counter = counter + 1
 
-    return cleaned_signal
+        if label2[i] == 1:
+            #cleaned_signal2 = np.append(cleaned_signal2, spec[:, i].reshape((np.shape(filtered)[0], 1)), axis=1)
+            cleaned_signal.append(spec[:, i])
+
+    #print "Denoising finished " + str(np.array(cleaned_signal).shape) #+ " " + str(cleaned_signal2.shape)
+    return np.array(cleaned_signal)
+
 
 ###############################
 ## Create the Spectrograms
@@ -213,9 +230,9 @@ for rec in recordings:
             if len(cleaned_signal) > 0:
                 segments = []
                 segments = []
-                hop_size = cleaned_signal.shape[0] / 2
-                for i in range(int(np.floor(cleaned_signal.shape[1] / hop_size - 1))):
-                    segment = cleaned_signal[:, i * hop_size:i * hop_size + cleaned_signal.shape[0]]
+                hop_size = cleaned_signal.shape[1] / 2
+                for i in range(int(np.floor(cleaned_signal.shape[0] / hop_size - 1))):
+                    segment = cleaned_signal[i * hop_size:i * hop_size + cleaned_signal.shape[1]]
                     resized_segment = scipy.misc.imresize(segment, (SEGMENT_SIZE, SEGMENT_SIZE), interp='nearest')
                     segments.append(resized_segment)
                 print fname + " " + str(np.array(segments).shape)
