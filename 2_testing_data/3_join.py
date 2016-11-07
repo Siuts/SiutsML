@@ -13,7 +13,7 @@ from sklearn.preprocessing import scale
 import json
 
 pickles_dir = "../data/segments/1/testing/"
-num_labels = 10
+num_labels = 20
 image_size = 64
 
 def load_pickled_segments_from_file_(filename, label, recId):
@@ -93,8 +93,8 @@ all_segments = np.empty
 all_labels = np.empty
 all_rec_Ids = np.empty
 
-
-
+species_file_count = {}
+species_segments_count = {}
 for rec in dataset:
     fname = rec[1]
     label = rec[2]
@@ -111,10 +111,22 @@ for rec in dataset:
             all_labels = np.vstack((all_labels, labels))
             all_rec_Ids = np.concatenate((all_rec_Ids, rec_ids))
         counter += 1
+        specimen = fname.split("-")[0]
+        if specimen in species_file_count:
+            species_file_count[specimen] = species_file_count[specimen] + 1
+            species_segments_count[specimen] = species_segments_count[specimen] + processed_segments.shape[0]
+        else:
+            species_file_count[specimen] = 1
+            species_segments_count[specimen] = processed_segments.shape[0]
     if counter % 25 == 0:
         print str(counter) + "/" + str(len(test_files))
 
+print "Species file count: "
+print species_file_count
+print " "
 
+print "Species segments count: "
+print species_segments_count
 data_fname = "../data/dataset/1/testing/testing_data.pickle"
 labels_fname = "../data/dataset/1/testing/testing_labels.pickle"
 rec_Ids_fname = "../data/dataset/1/testing/testing_rec_ids.pickle"
@@ -128,10 +140,3 @@ with open(labels_fname, 'wb') as f:
 with open(rec_Ids_fname, 'wb') as f:
     pickle.dump(all_rec_Ids, f, protocol=-1)
 print " "
-
-
-
-# In[5]:
-
-print all_labels[30]
-

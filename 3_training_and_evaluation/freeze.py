@@ -51,7 +51,7 @@ tf.app.flags.DEFINE_string("input_graph", "logs/graph.pb",
 tf.app.flags.DEFINE_string("input_saver", "",
                            """TensorFlow saver file to load.""")
                            
-tf.app.flags.DEFINE_string("input_checkpoint", "logs/model.ckpt-4750",
+tf.app.flags.DEFINE_string("input_checkpoint", "logs/model.ckpt-33228",
                            """TensorFlow variables file to load.""")
                            
 tf.app.flags.DEFINE_string("output_graph", "logs/frozen_graph.pb",

@@ -13,8 +13,9 @@ import pickle
 from tensorflow.python.platform import gfile
 from sklearn.metrics import confusion_matrix
 import numpy as np
+np.set_printoptions(threshold=np.inf)
 
-num_classes = 10
+num_classes = 20
 test_batch = 100
 dataset_loc = "../data/dataset/1/testing/"
 
@@ -74,12 +75,14 @@ with tf.Session() as persisted_sess:
 
     testing_labels = testing_labels[:testing_predictions.shape[0]]
 
-
+#print testing_labels
 predictions = np.argmax(testing_predictions, 1)
 labels = np.argmax(testing_labels, 1)
 rec_ids = rec_ids[:testing_predictions.shape[0]]
 print np.max(labels)
-print len(np.unique(testing_labels))
+print len(np.unique(labels))
+
+
 
 print "Accuracy: " + str(accuracy(testing_predictions, testing_labels))
 print
@@ -100,14 +103,22 @@ print conf_matrix
 print
 print "Prediction accuracy by label"
 
+print "Labels     Species name      Recall Precis. F1-score"
+print "----------------------------------------------------"
 for i in range(num_classes):
     TP = conf_matrix[i][i]
     SUM = np.sum(conf_matrix[i])
-    print "{0} - {1} accuracy: {2}".format(i, labels_dict[i], float(TP)/SUM)
+    recall = float(TP)/SUM*100
+    precision = float(TP)/np.sum(conf_matrix[:,i])*100
+    f1 = 2*(recall*precision)/(recall+precision)
+    print "{:2d} {:^25} {:05.2f} | {:05.2f} | {:05.2f}".format(i, labels_dict[i], recall, precision, f1)
+
 
 print
 print
 print
+
+
 
 
 file_predictions = []
@@ -155,14 +166,22 @@ print
 print
 rec_conf_matrix = confusion_matrix(rec_labels, rec_predictions)
 print "Confusion Matrix"
-print rec_conf_matrix
+#print rec_conf_matrix
 print
 print "Prediction accuracy by label"
-
+print "Labels     Species name       Recall Precis. F1-score"
+print "-----------------------------------------------------"
 for i in range(num_classes):
     TP = rec_conf_matrix[i][i]
     SUM = np.sum(rec_conf_matrix[i])
-    print "{0} - {1} accuracy: {2}".format(i, labels_dict[i], float(TP)/SUM)
+    recall = float(TP)/SUM*100
+    precision = float(TP)/np.sum(rec_conf_matrix[:,i])*100
+    if recall == 0 and precision == 0:
+        f1 = 0
+    else:
+        f1 = 2*(recall*precision)/(recall+precision)
+    print "{:2d} {:^25} {:6.2f} | {:6.2f} | {:6.2f}".format(i, labels_dict[i], recall, precision, f1)
+
 
 print
 print
@@ -191,6 +210,3 @@ for i in range(len(file_predictions_mean)):
         FPs += 1
         
 print "Accuracy: " + str(float(TPs)/len(file_predictions_mean))
-
-    
-

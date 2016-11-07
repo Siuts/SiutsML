@@ -22,7 +22,7 @@ import os
 folder = '../data/'
 segments_folder = folder + 'segments/1/testing/'
 wav_folder = folder + "test_wavs/"
-num_species = 10
+num_species = 20
 
 recordings = pickle.load(open(folder + "test_dataset.pickle", "rb"))
 

@@ -56,7 +56,7 @@ for page_nr in range(1, 17):
                 ext = file_loc.split(".")[-1]
                 #print "{0} {1} {2}".format(counter, file_loc, ext)
                 sp_name = labels_dict[taxon_urls[taxon_url]]
-                fname = "{}_{:05d}".format(sp_name, audio_data["id"])
+                fname = "{}-{:06d}".format(sp_name, audio_data["id"])
                 urllib.urlretrieve(file_loc, "{}/{}.{}".format(download_dir, fname, ext))
                 recordings.append([counter, fname, taxon_urls[taxon_url], ext])
                 counter += 1
