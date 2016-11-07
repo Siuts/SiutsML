@@ -10,14 +10,14 @@ start = time.time()
 
 num_epochs = 2 
 samples_in_file = 4096
-num_files = 17
+num_files = 26
 
 dataset_loc = '../data/dataset/1/'
 test_dataset_length = 100
 
 
 image_size = 64
-num_labels = 10
+num_labels = 20
 
 batch_size = 128
 

@@ -6,6 +6,9 @@ from sklearn.cross_validation import train_test_split
 import numpy as np
 from sklearn.preprocessing import scale
 import random
+import time
+
+start_time = time.time()
 
 pickles_dir = "../data/segments/1/training/"
 
@@ -59,8 +62,8 @@ def find_biggest_in_dir(directory):
             name = fname
     return name
 
-with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
-    max_segments = len(pickle.load(f))
+#with open(pickles_dir + find_biggest_in_dir(pickles_dir), 'rb') as f:
+#    max_segments = len(pickle.load(f))
     
 recordings = [x.split(".")[0] for x in listdir(pickles_dir) if isfile(join(pickles_dir, x))]
 train_files, valid_files = train_test_split(recordings, test_size=0.02, random_state=23)
@@ -128,9 +131,12 @@ for specimen in species:
     for rec in specimen_files:
         fname = rec[1]
         with open(pickles_dir + fname + ".pickle", 'rb') as f:
-             segments = pickle.load(f)
-        species_segments_count = species_segments_count + len(segments)
-    if species_segments_count[specimen] > max:
+             segs = pickle.load(f)
+        if (specimen in species_segments_count):
+            species_segments_count[specimen] = species_segments_count[specimen] + len(segs)
+        else:
+            species_segments_count[specimen] = len(segs)
+    if species_segments_count[specimen] > max_segments:
         max_segments = species_segments_count[specimen]
 print "Species files count"
 print species_files_count
@@ -154,7 +160,7 @@ for specimen in species:
     all_labels = np.empty
     all_rec_Ids = np.empty
 
-    filepath_prefix = "{0}{1}_".format(pickles_dir, specimen)
+    filepath_prefix = "{0}{1}_".format(save_dir, specimen)
     data_fname = filepath_prefix + "data.pickle"
     labels_fname = filepath_prefix + "labels.pickle"
     rec_Ids_fname = filepath_prefix + "rec_ids.pickle"
@@ -211,3 +217,6 @@ for specimen in species:
 
         with open(rec_Ids_fname, 'wb') as f:
             pickle.dump(all_rec_Ids, f, protocol=-1)
+
+
+print "The process took {0} seconds".format(time.time()-start_time)
