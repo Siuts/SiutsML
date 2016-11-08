@@ -24,7 +24,7 @@ print species
 # 18: 'Corvus_cornix', 19: 'Apus_apus'}
 
 taxon_ids = {0: 86560, 1: 60814, 2: 107910, 3: 89499, 4: 102319, 5: 57887, 6: 107914, 7: 86555, 8: 102323, 9: 89514, 10: 56209, 11: 43289,
-             12: 86608, 13: 102321, 14: 72325, 15: 60307, 16: 43434, 17: 48392, 18: 110936, 19: 36397}
+             12: 86608, 13: 102321, 14: 72325, 15: 60307, 16: 43434, 17: 48932, 18: 110936, 19: 36397}
 
 taxon_url_temp = "https://api.plutof.ut.ee/v1/taxonomy/taxonnodes/{0}/"
 taxon_urls = { taxon_url_temp.format(v) : k for k, v in taxon_ids.items() }

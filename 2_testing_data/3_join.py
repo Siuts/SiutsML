@@ -99,7 +99,12 @@ for rec in dataset:
     fname = rec[1]
     label = rec[2]
     rec_id = rec[0]
-    rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
+    if isfile(pickles_dir + fname + ".pickle"):
+        rec_segments, labels, rec_ids = load_pickled_segments_from_file(pickles_dir + fname + ".pickle", label, rec_id)
+    else:
+        rec_segments = np.empty([0])
+        labels = np.empty([0])
+        rec_ids = np.empty([0])
     if (rec_segments.shape[0] > 0 and labels.shape[0] > 0 and not np.isinf(np.sum(rec_segments))):
         processed_segments = scale_and_resize_segments(rec_segments)
         if counter == 0:

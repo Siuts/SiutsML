@@ -108,9 +108,15 @@ print "----------------------------------------------------"
 for i in range(num_classes):
     TP = conf_matrix[i][i]
     SUM = np.sum(conf_matrix[i])
-    recall = float(TP)/SUM*100
+    if SUM == 0:
+        recall = 0
+        precision = 0
+        f1 = 0
+    else:
+        recall = float(TP)/SUM*100
+        precision = float(TP)/np.sum(conf_matrix[:,i])*100
+        f1 = 2*(recall*precision)/(recall+precision)
     precision = float(TP)/np.sum(conf_matrix[:,i])*100
-    f1 = 2*(recall*precision)/(recall+precision)
     print "{:2d} {:^25} {:05.2f} | {:05.2f} | {:05.2f}".format(i, labels_dict[i], recall, precision, f1)
 
 
@@ -174,7 +180,10 @@ print "-----------------------------------------------------"
 for i in range(num_classes):
     TP = rec_conf_matrix[i][i]
     SUM = np.sum(rec_conf_matrix[i])
-    recall = float(TP)/SUM*100
+    if SUM == 0:
+        recall = 0
+    else:
+        recall = float(TP)/SUM*100
     precision = float(TP)/np.sum(rec_conf_matrix[:,i])*100
     if recall == 0 and precision == 0:
         f1 = 0
