@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 import pickle
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 import time
@@ -80,11 +82,11 @@ patch4_size = 3
 patch5_size = 3
 conv_depth1 = 32
 conv_depth2 = 96
-conv_depth3 = 192
+conv_depth3 = 128
 conv_depth4 = 128
 conv_depth5 = 128
-num_hidden1 = 512
-num_hidden2 = 256
+num_hidden1 = 256
+num_hidden2 = 128
 
 conv_stride = 2
 
@@ -171,17 +173,16 @@ with graph.as_default():
         print "Conv3 shape: " + str(hidden.get_shape())
 
         # Conv4
-        conv = tf.nn.conv2d(hidden, conv4_kernel, [1, 1, 1, 1], padding='SAME', name="conv4")
-        hidden = tf.nn.elu(conv + conv4_biases, name="relu4")
-        print "Conv4 shape: " + str(hidden.get_shape())
+        #conv = tf.nn.conv2d(hidden, conv4_kernel, [1, 1, 1, 1], padding='SAME', name="conv4")
+        #hidden = tf.nn.elu(conv + conv4_biases, name="relu4")
+        #print "Conv4 shape: " + str(hidden.get_shape())
 
         # Conv5
-        conv = tf.nn.conv2d(hidden, conv5_kernel, [1, 1, 1, 1], padding='SAME', name="conv5")
-        hidden = tf.nn.elu(conv + conv5_biases, name="relu5")
-        print "Conv5 shape: " + str(hidden.get_shape())
+        #conv = tf.nn.conv2d(hidden, conv5_kernel, [1, 1, 1, 1], padding='SAME', name="conv5")
+        #hidden = tf.nn.elu(conv + conv5_biases, name="relu5")
+        #print "Conv5 shape: " + str(hidden.get_shape())
 
-        hidden = tf.nn.max_pool(hidden, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
-                                padding='SAME', name='pool2')
+        hidden = tf.nn.max_pool(hidden, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool2')
 
         #hidden = tf.nn.dropout(hidden, 0.75, name="dropout2")
         print "Max pool 5 shape: " + str(hidden.get_shape())
@@ -222,12 +223,12 @@ with graph.as_default():
         hidden = tf.nn.elu(conv + conv3_biases, name="relu3")
 
         # Conv4
-        conv = tf.nn.conv2d(hidden, conv4_kernel, [1, 1, 1, 1], padding='SAME', name="conv4")
-        hidden = tf.nn.elu(conv + conv4_biases, name="relu4")
+        #conv = tf.nn.conv2d(hidden, conv4_kernel, [1, 1, 1, 1], padding='SAME', name="conv4")
+        #hidden = tf.nn.elu(conv + conv4_biases, name="relu4")
 
         # Conv5
-        conv = tf.nn.conv2d(hidden, conv5_kernel, [1, 1, 1, 1], padding='SAME', name="conv5")
-        hidden = tf.nn.elu(conv + conv5_biases, name="relu5")
+        #conv = tf.nn.conv2d(hidden, conv5_kernel, [1, 1, 1, 1], padding='SAME', name="conv5")
+        #hidden = tf.nn.elu(conv + conv5_biases, name="relu5")
 
         hidden = tf.nn.max_pool(hidden, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
                                 padding='SAME', name='pool2')
@@ -329,8 +330,7 @@ with tf.Session(graph=graph) as session:
             training_acc.append(batch_acc)
             validation_acc.append(eval_acc)
 
-            if eval_acc > max_eval_acc:
-                max_eval_acc = eval_acc
+            if step % 1000 == 0:
                 saver.save(session, checkpoint_path, global_step=step)
 
             print('%d - Minibatch loss: %f | Minibatch accuracy: %.1f%% | Validation accuracy: %.1f%%' % (

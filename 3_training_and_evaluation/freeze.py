@@ -38,10 +38,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+import sys
 
 from google.protobuf import text_format
 from tensorflow.python.framework import graph_util
 
+step = 33228
+if len(sys.argv) > 1:
+    step = sys.argv[1]
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -51,7 +55,7 @@ tf.app.flags.DEFINE_string("input_graph", "logs/graph.pb",
 tf.app.flags.DEFINE_string("input_saver", "",
                            """TensorFlow saver file to load.""")
                            
-tf.app.flags.DEFINE_string("input_checkpoint", "logs/model.ckpt-33228",
+tf.app.flags.DEFINE_string("input_checkpoint", "logs/model.ckpt-" + str(step),
                            """TensorFlow variables file to load.""")
                            
 tf.app.flags.DEFINE_string("output_graph", "logs/frozen_graph.pb",
