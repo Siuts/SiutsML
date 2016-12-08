@@ -2,21 +2,13 @@ import json
 import urllib2
 import urllib
 import pickle
-import csv
 import os
+import siuts
 from siuts import create_dir, Recording
 
-data_dir = "data/"
-create_dir(data_dir)
-
-# Species are currently handpicked from PlutoF 
-species_set = ['Parus_major', 'Coloeus_monedula', 'Corvus_cornix', 'Fringilla_coelebs',
-               'Erithacus_rubecula', 'Phylloscopus_collybita', 'Turdus_merula', 'Cyanistes_caeruleus',
-               'Emberiza_citrinella', 'Chloris_chloris', 'Turdus_philomelos', 'Phylloscopus_trochilus',
-               'Sylvia_borin', 'Apus_apus', 'Passer_domesticus', 'Luscinia_luscinia', 'Sylvia_atricapilla',
-               'Ficedula_hypoleuca', 'Sylvia_communis', 'Carpodacus_erythrinus']
-
-acceptable_quality = ["A", "B"]
+create_dir(siuts.data_dir)
+species_set = siuts.species_list
+acceptable_quality = siuts.acceptable_quality
 
 all_recordings = []
 for species_name in species_set:
@@ -38,11 +30,13 @@ for species_name in species_set:
             json_data = json.load(urllib2.urlopen(url + "&page=" + str(page)))
     all_recordings = all_recordings + recordings
     
-with open(data_dir+"training_recordings.pickle", 'wb') as f:
+with open(siuts.data_dir+"training_recordings.pickle", 'wb') as f:
     pickle.dump(all_recordings, f, protocol=-1)
 print "Finished downloading and saving training meta-data"
 
-path = "data/mp3/"
+dataset = []
+
+path = siuts.xeno_dir
 create_dir(path)
 recordings_count = len(all_recordings)
 
@@ -54,4 +48,4 @@ for rec in all_recordings:
         print "{0}/{1} downloaded".format(i, recordings_count)
 
     if not os.path.isfile(file_path) or os.stat(file_path).st_size == 0:
-        urllib.urlretrieve (rec.file_url, path + rec.get_filename() +".mp3")
+        urllib.urlretrieve (rec.file_url, file_path)
