@@ -13,10 +13,13 @@ plutoF_taxon_ids = [86560, 48932, 110936, 60814, 57887, 89499, 107910, 86555, 56
 # xeno-canto quality A is the best
 acceptable_quality = ["A", "B"]
 
+wav_framerate = 22050
 
 data_dir = "data/"
 xeno_dir = data_dir + "xeno_recordings/"
 plutoF_dir = data_dir + "plutof_recordings/"
+training_wavs_dir = data_dir + "training_wavs/"
+testing_wavs_dir = data_dir + "testing_wavs/"
 
 
 class Recording:
