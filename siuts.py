@@ -1,5 +1,6 @@
 import os
 
+
 # List of species used in classification task. The index of the list is the label for each species
 species_list = ['Parus_major', 'Coloeus_monedula', 'Corvus_cornix', 'Fringilla_coelebs',
                'Erithacus_rubecula', 'Phylloscopus_collybita', 'Turdus_merula', 'Cyanistes_caeruleus',
@@ -15,11 +16,22 @@ acceptable_quality = ["A", "B"]
 
 wav_framerate = 22050
 
+fft_frame_size = 512
+
+resized_segment_size = 64
+
+# overlap by half of the segment size
+segmentation_hop_size = fft_frame_size/4
+
 data_dir = "data/"
 xeno_dir = data_dir + "xeno_recordings/"
 plutoF_dir = data_dir + "plutof_recordings/"
+training_recordings_path = data_dir + "training_recordings.pickle"
+testing_recordings_path = data_dir + "testing_recordings.pickle"
 training_wavs_dir = data_dir + "training_wavs/"
 testing_wavs_dir = data_dir + "testing_wavs/"
+training_segments_dir = data_dir + "training_segments/"
+testing_segments_dir = data_dir + "testing_segments/"
 
 
 class Recording:
@@ -45,5 +57,45 @@ def create_dir(path):
     (dirname, _) = os.path.split(path)
     if (not os.path.isdir(dirname)):
         os.makedirs(dirname)
+
+import wave
+import pylab
+def get_wav_info(wav_file):
+    wav = wave.open(wav_file, 'r')
+    frames = wav.readframes(-1)
+    sound_info = pylab.fromstring(frames, 'Int16')
+    frame_rate = wav.getframerate()
+    wav.close()
+    return sound_info, frame_rate
+
+import numpy as np
+from numpy.lib import stride_tricks
+def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
+    win = window(frameSize)
+    hopSize = int(frameSize - np.floor(overlapFac * frameSize))
     
+    # zeros at beginning (thus center of 1st window should be for sample nr. 0)
+    samples = np.append(np.zeros(int(np.floor(frameSize/2.0))), sig)    
+    # cols for windowing
+    cols = np.ceil( (len(samples) - frameSize) / float(hopSize)) + 1
+
+    samples = np.append(samples, np.zeros(frameSize))
+    
+    frames = stride_tricks.as_strided(samples, shape=(cols, frameSize), strides=(samples.strides[0]*hopSize, samples.strides[0])).copy()
+    frames *= win
+    
+    return np.fft.fft(frames)  
+
+def clean_spectrogram(transposed_spectrogram, coef=3):
+    row_means = transposed_spectrogram.mean(axis=0)
+    col_means = transposed_spectrogram.mean(axis=1)
+    
+    cleaned_spectrogram = []
+
+    for col_index, column in enumerate(transposed_spectrogram):
+        for row_index, pixel in enumerate(column):
+            if (pixel > coef*row_means[row_index] and pixel > coef*col_means[col_index]):
+                cleaned_spectrogram.append(transposed_spectrogram[col_index])
+                break
+    return np.array(cleaned_spectrogram)
 
