@@ -33,6 +33,13 @@ testing_wavs_dir = data_dir + "testing_wavs/"
 training_segments_dir = data_dir + "training_segments/"
 testing_segments_dir = data_dir + "testing_segments/"
 
+dataset_dir = data_dir + "dataset/"
+testing_data_filepath = dataset_dir + "testing_data.pickle"
+testing_labels_filepath = dataset_dir + "testing_labels.pickle"
+testing_rec_ids_filepath = dataset_dir + "testing_rec_ids.pickle"
+validation_data_filepath = dataset_dir + "validation_data.pickle"
+validation_labels_filepath = dataset_dir + "validation_labels.pickle"
+validation_rec_ids_filepath = dataset_dir + "validation_rec_ids.pickle"
 
 class Recording:
     def __init__(self, id, gen, sp, label, file_url):
@@ -98,4 +105,12 @@ def clean_spectrogram(transposed_spectrogram, coef=3):
                 cleaned_spectrogram.append(transposed_spectrogram[col_index])
                 break
     return np.array(cleaned_spectrogram)
+
+from sklearn.preprocessing import scale
+def scale_segments(segments):
+    segment_size = len(segments[0])
+    segment_count = len(segments)
+    segments = segments.reshape([segment_count, segment_size*segment_size])
+    scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True )
+    return scaled_segments.reshape(segment_count, segment_size, segment_size, 1)
 
