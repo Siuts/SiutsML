@@ -9,6 +9,7 @@ from sklearn.cross_validation import train_test_split
 import warnings
 import sklearn.utils.validation
 import random
+import itertools
 warnings.simplefilter('ignore', sklearn.utils.validation.DataConversionWarning)
 
 def load_pickled_segments_from_file(filename, label, rec_id):
@@ -18,11 +19,9 @@ def load_pickled_segments_from_file(filename, label, rec_id):
     
     if segments_count == 0:
         return np.empty([0]), np.empty([0]), np.empty([0])
-    labels = np.empty(segments_count)
-    labels.fill(label)
-    rec_ids = np.empty(segments_count)
-    rec_ids.fill(rec_id)
-    return np.array(segments), labels, rec_ids
+    labels = [label] * segments_count
+    rec_ids = [rec_id] * segments_count
+    return segments, labels, rec_ids
 
 def join_segments(selected_recordings, segments_dir, data_filepath, labels_filepath, rec_ids_filepath):
     selected_recordings_count = len(selected_recordings)
@@ -39,18 +38,18 @@ def join_segments(selected_recordings, segments_dir, data_filepath, labels_filep
             label = rec.label
             rec_id = rec.id
             rec_segments, labels, rec_ids = load_pickled_segments_from_file(segments_dir + fname + ".pickle", label, rec_id)
-            if (rec_segments.shape[0] > 0 and labels.shape[0] > 0):
+            if (len(rec_segments) > 0 and len(labels) > 0):
                 processed_segments = siuts.scale_segments(rec_segments)
-                all_segments.append(processed_segments)
-                all_labels.append(labels)
-                all_rec_Ids.append(rec_ids)
+                all_segments = all_segments + processed_segments
+                all_labels = all_labels + labels
+                all_rec_Ids = all_rec_Ids + rec_ids
 
                 specimen = rec.get_name()
                 if specimen in segments_count:
-                    segments_count[specimen] = segments_count[specimen] + processed_segments.shape[0]
+                    segments_count[specimen] = segments_count[specimen] + len(processed_segments)
                     file_count[specimen] = file_count[specimen] + 1
                 else:
-                    segments_count[specimen] = processed_segments.shape[0]
+                    segments_count[specimen] = len(processed_segments)
                     file_count[specimen] = 1
             if counter % 100 == 0:
                 print "{0}/{1}".format(counter, selected_recordings_count)
@@ -65,7 +64,7 @@ def join_segments(selected_recordings, segments_dir, data_filepath, labels_filep
             pickle.dump(np.array(all_rec_Ids), f, protocol=-1)
         print "File count: " + str(file_count)
         print "Segments count: " + str(segments_count)
-        
+
 create_dir(siuts.dataset_dir)
 
 training_segments_dir = siuts.training_segments_dir
@@ -94,7 +93,6 @@ selected_validation_recordings = [x for x in training_recordings if x.get_filena
 join_segments(selected_validation_recordings, training_segments_dir, siuts.validation_data_filepath, siuts.validation_labels_filepath, siuts.validation_rec_ids_filepath)
 
 print "Joining validation segments took {0} seconds".format(time.time() - start)
-
 
 start = time.time()
 max_segments = 0
@@ -134,7 +132,7 @@ for specimen in species:
     specimen_files = [x for x in training_recordings if x.get_name() == specimen and x.get_filename() in train_filenames]
     specimen_files_count = len(specimen_files)
     
-    all_segments = []
+    all_segments = np.empty
     all_labels = []
     all_rec_ids = []
 
@@ -148,28 +146,34 @@ for specimen in species:
             label = rec.label
             rec_id = rec.id
             rec_segments, labels, rec_ids = load_pickled_segments_from_file(siuts.training_segments_dir + fname + ".pickle", label, rec_id)
-            if (rec_segments.shape[0] > 0 and labels.shape[0] > 0):
-                processed_segments = siuts.scale_segments(rec_segments)
-                all_segments.append(processed_segments)
-                all_labels.append(labels)
-                all_rec_ids.append(rec_ids)
+            if (len(rec_segments) > 0 and len(labels) > 0):
+                processed_segments = np.array(siuts.scale_segments(rec_segments))
+
+                all_labels = all_labels + labels
+                all_rec_ids = all_rec_ids + rec_ids
+                if counter == 0:
+                    all_segments = processed_segments
+                else:
+                    all_segments = np.vstack((all_segments, processed_segments))
 
             if counter % 100 == 0:
                 print "{0}/{1}".format(counter, specimen_files_count)
         
+        del rec_segments
+        del processed_segments
         print "Saving joined files to disk"
-        training_data = np.array(all_segments)
-        random.shuffle(training_data)
-        nr_samples = len(training_data)
+        #training_data = np.array(all_segments)
+        random.shuffle(all_segments)
+        nr_samples = len(all_segments)
         if (nr_samples < max_segments):
-            data_to_append = np.copy(training_data)
+            data_to_append = np.copy(all_segments)
             for j in range(int(np.floor(max_segments/nr_samples))-1):
-                training_data = np.concatenate((training_data, data_to_append))
-            training_data = np.concatenate((training_data, data_to_append[:(max_segments-len(training_data))]))
+                all_segments = np.concatenate((all_segments, data_to_append))
+            all_segments = np.concatenate((all_segments, data_to_append[:(max_segments-len(all_segments))]))
         nr_of_files = int(np.ceil(float(max_segments)/max_segments_in_file))
         for i in range(nr_of_files):
             with open("{0}/{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, i), 'wb') as f:
-                pickle.dump(training_data[i*max_segments_in_file:(i+1)*max_segments_in_file], f, protocol=-1)
+                pickle.dump(all_segments[i*max_segments_in_file:(i+1)*max_segments_in_file], f, protocol=-1)
         print specimen + "segments saved"
 
         with open(labels_fname, 'wb') as f:
@@ -180,4 +184,3 @@ for specimen in species:
 
 
 print "Joining training segments took {0} seconds".format(time.time() - start)
-

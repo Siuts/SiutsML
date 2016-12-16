@@ -110,7 +110,7 @@ from sklearn.preprocessing import scale
 def scale_segments(segments):
     segment_size = len(segments[0])
     segment_count = len(segments)
-    segments = segments.reshape([segment_count, segment_size*segment_size])
+    segments = np.reshape(segments, (segment_count, segment_size*segment_size))
     scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True )
-    return scaled_segments.reshape(segment_count, segment_size, segment_size, 1)
+    return scaled_segments.reshape(segment_count, segment_size, segment_size, 1).tolist()
 
