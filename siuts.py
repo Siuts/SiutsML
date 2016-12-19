@@ -59,7 +59,34 @@ class Recording:
     def get_filename(self):
         """Return the filename withoud extension - <genus_species-id>"""
         return "{0}_{1}-{2}".format(self.gen, self.sp, self.id)
-    
+
+
+# class Accuracy:
+#     def __init__(self, step, seg_acc, seg_auc, seg_f1, seg_conf_matrix, file_acc, file_auc, file_f1, file_conf_matrix, top3):
+#         self.step = step
+#         self.seg_acc = seg_acc
+#         self.seg_auc = seg_auc
+#         self.seg_f1 = seg_f1
+#         self.seg_conf_matrix = seg_conf_matrix
+#         self.file_acc = file_acc
+#         self.file_auc = file_auc
+#         self.file_f1 = file_f1
+#         self.file_conf_matrix = file_conf_matrix
+#         self.top3_acc = top3_acc
+
+class Accuracy:
+    step = None
+    seg_acc = None
+    seg_auc = None
+    seg_f1 = None
+    seg_conf_matrix = None
+    file_acc = None
+    file_auc = None
+    file_f1 = None
+    file_conf_matrix = None
+    top3_acc = None
+
+
 def create_dir(path):
     (dirname, _) = os.path.split(path)
     if (not os.path.isdir(dirname)):

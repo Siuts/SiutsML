@@ -1,4 +1,7 @@
+.idea/
 logs/
+checkpoints/
+experiments/
 *.wav
 *.pickle
 *.mp3
@@ -6,6 +9,7 @@ logs/
 *.mp4
 *.ogg
 *.csv
+*~
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
