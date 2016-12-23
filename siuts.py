@@ -1,6 +1,5 @@
 import os
 
-
 # List of species used in classification task. The index of the list is the label for each species
 species_list = ['Parus_major', 'Coloeus_monedula', 'Corvus_cornix', 'Fringilla_coelebs',
                'Erithacus_rubecula', 'Phylloscopus_collybita', 'Turdus_merula', 'Cyanistes_caeruleus',
@@ -19,6 +18,10 @@ wav_framerate = 22050
 fft_frame_size = 512
 
 resized_segment_size = 64
+
+test_batch_size = 32
+
+samples_in_file = 4096
 
 # overlap by half of the segment size
 segmentation_hop_size = fft_frame_size/4
@@ -42,6 +45,8 @@ validation_labels_filepath = dataset_dir + "validation_labels.pickle"
 validation_rec_ids_filepath = dataset_dir + "validation_rec_ids.pickle"
 
 class Recording:
+    segments_count = None
+    
     def __init__(self, id, gen, sp, label, file_url):
         self.id = id
         self.gen = gen
@@ -61,20 +66,10 @@ class Recording:
         return "{0}_{1}-{2}".format(self.gen, self.sp, self.id)
 
 
-# class Accuracy:
-#     def __init__(self, step, seg_acc, seg_auc, seg_f1, seg_conf_matrix, file_acc, file_auc, file_f1, file_conf_matrix, top3):
-#         self.step = step
-#         self.seg_acc = seg_acc
-#         self.seg_auc = seg_auc
-#         self.seg_f1 = seg_f1
-#         self.seg_conf_matrix = seg_conf_matrix
-#         self.file_acc = file_acc
-#         self.file_auc = file_auc
-#         self.file_f1 = file_f1
-#         self.file_conf_matrix = file_conf_matrix
-#         self.top3_acc = top3_acc
-
 class Accuracy:
+    def __init__(self):
+        pass
+
     step = None
     seg_acc = None
     seg_auc = None
@@ -120,6 +115,7 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
     
     return np.fft.fft(frames)  
 
+
 def clean_spectrogram(transposed_spectrogram, coef=3):
     row_means = transposed_spectrogram.mean(axis=0)
     col_means = transposed_spectrogram.mean(axis=1)
@@ -132,6 +128,7 @@ def clean_spectrogram(transposed_spectrogram, coef=3):
                 cleaned_spectrogram.append(transposed_spectrogram[col_index])
                 break
     return np.array(cleaned_spectrogram)
+
 
 from sklearn.preprocessing import scale
 def scale_segments(segments):
