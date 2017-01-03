@@ -132,9 +132,10 @@ def clean_spectrogram(transposed_spectrogram, coef=3):
 
 from sklearn.preprocessing import scale
 def scale_segments(segments):
-    segment_size = len(segments[0])
+    segment_size1 = len(segments[0])
+    segment_size2 = len(segments[0][0])
     segment_count = len(segments)
-    segments = np.reshape(segments, (segment_count, segment_size*segment_size))
+    segments = np.reshape(segments, (segment_count, segment_size1*segment_size2))
     scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True )
-    return scaled_segments.reshape(segment_count, segment_size, segment_size, 1).tolist()
+    return scaled_segments.reshape(segment_count, segment_size1, segment_size2).tolist()
 

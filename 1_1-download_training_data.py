@@ -21,7 +21,7 @@ for species_name in species_set:
     
     # if data is divided to several pages, then include them all
     page = int(json_data["page"])
-    while (int(json_data["numPages"]) - page >= 0): 
+    while int(json_data["numPages"]) - page >= 0:
         #creates list of Recordings objects
         quality_recordings = [Recording(x['id'], x['gen'], x['sp'], species_set.index("{0}_{1}".format(x["gen"], x["sp"])), x["file"]) for x in json_data["recordings"] if x["q"] in acceptable_quality]
         recordings = recordings + quality_recordings
@@ -43,7 +43,7 @@ recordings_count = len(all_recordings)
 i = 0
 for rec in all_recordings:
     file_path = path + rec.get_filename() + ".mp3"
-    i = i + 1
+    i += 1
     if i%100==0:
         print "{0}/{1} downloaded".format(i, recordings_count)
 

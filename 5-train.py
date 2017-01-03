@@ -91,20 +91,27 @@ with graph.as_default():
     def model(data, input_dropout, fc_dropout):
         data = tf.nn.dropout(data, input_dropout)
         # Conv1
+        print data
         conv = conv2d("conv1", data, [5, 5, 1, 32], [32], 2)
         pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
+        print pool
 
         # Conv2
-        conv = conv2d("conv2", pool, [5, 5, 32, 96], [96])
+        conv = conv2d("conv2", pool, [5, 5, 32, 64], [64])
         pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool2')
+        print pool
 
         # Conv3
-        conv = conv2d("conv3", pool, [3, 3, 96, 128], [128])
+        conv = conv2d("conv3", pool, [3, 3, 64, 128], [128])
         pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool3')
-
+        print pool
         # Conv4
-        conv = conv2d("conv4", pool, [3, 3, 128, 256], [256])
-        pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool4')
+        # conv = conv2d("conv4", pool, [3, 3, 128, 256], [256])
+        # pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool4')
+        #
+        # # Conv5
+        # conv = conv2d("conv5", pool, [3, 3, 192, 256], [256])
+        # pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool5')
 
         # Fully connected1
         shape = pool.get_shape().as_list()
@@ -125,11 +132,9 @@ with graph.as_default():
         tf.nn.softmax_cross_entropy_with_logits(logits + 1e-50, tf_train_labels))
 
     # Optimizer.
-    optimizer = tf.train.MomentumOptimizer(0.001, 0.9, use_locking=False, name='Momentum', use_nesterov=True).minimize(
-        loss)
-    # optimizer = tf.train.AdamOptimizer(0.0005).minimize(loss)
+    optimizer = tf.train.MomentumOptimizer(0.0005, 0.95, use_locking=False, name='Momentum', use_nesterov=True).minimize(loss)
+    # optimizer = tf.train.AdamOptimizer(0.00025).minimize(loss)
 
-    # Predictions for the training,  and test data.
     tf.get_variable_scope().reuse_variables()
     train_prediction = tf.nn.softmax(model(tf_train_dataset, 1, 1), name="sm_train")
     test_prediction = tf.nn.softmax(model(tf_test_dataset, 1, 1), name="sm_test")
