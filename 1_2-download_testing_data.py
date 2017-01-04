@@ -35,7 +35,7 @@ for page in range(1, number_of_pages + 1):
         taxon_url = [x['href'] for x in links if 'rel' in x and x['rel'] == 'taxon_node'][0]    
         
         # if species is part of our classification task
-        if (taxon_url in taxon_urls):
+        if taxon_url in taxon_urls:
             audio_urls = [x['href'] for x in links if 'format' in x and 'audio' in x['format']]
             if len(audio_urls) > 0:
                 audio_url = audio_urls[0].replace("/public/", "/")
@@ -54,7 +54,6 @@ for page in range(1, number_of_pages + 1):
                 
                 if not os.path.isfile(file_path) or os.stat(file_path).st_size == 0:
                     urllib.urlretrieve(file_url, file_path)
-                
 
                 recordings.append(Recording(rec_id, gen, sp, label, file_url))
                 counter += 1

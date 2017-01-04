@@ -71,11 +71,11 @@ def join_segments(selected_recordings, segments_dir, data_filepath, labels_filep
 
 
 # count segments for each recording in testing data 
-with open(siuts.testing_recordings_path, "rb") as f:
+with open(siuts.plutof_metadata_path, "rb") as f:
     plutof_recordings = pickle.load(f)
 
 for rec in plutof_recordings:
-    segments_path = siuts.testing_segments_dir + rec.get_filename() + ".pickle"
+    segments_path = siuts.plutof_segments_dir + rec.get_filename() + ".pickle"
     if isfile(segments_path):
         with open(segments_path, "rb") as f:
             rec.segments_count = len(pickle.load(f))
@@ -106,8 +106,8 @@ for specimen in siuts.species_list:
 
 siuts.create_dir(create_dir(siuts.dataset_dir))
 
-training_segments_dir = siuts.training_segments_dir
-testing_segments_dir = siuts.testing_segments_dir
+training_segments_dir = siuts.xeno_segments_dir
+testing_segments_dir = siuts.plutof_segments_dir
 
 start = time.time()
 print "Starting to join testing segments"
@@ -142,7 +142,7 @@ print
 print "Finding species from training set which has the maximum number of segments"
 train_filenames = [x.split(".")[0] for x in listdir(training_segments_dir) if isfile(join(training_segments_dir, x))]
 species = siuts.species_list
-with open(siuts.training_recordings_path, "rb") as f:
+with open(siuts.xeno_metadata_path, "rb") as f:
     training_recordings = pickle.load(f)
 for specimen in species:
     specimen_files = [x for x in training_recordings if
@@ -150,7 +150,7 @@ for specimen in species:
     species_files_count[specimen] = len(specimen_files)
     for rec in specimen_files:
         fname = rec.get_filename()
-        with open(siuts.training_segments_dir + fname + ".pickle", 'rb') as f:
+        with open(siuts.xeno_segments_dir + fname + ".pickle", 'rb') as f:
             segs = pickle.load(f)
         if specimen in species_segments_count:
             species_segments_count[specimen] += len(segs)
@@ -192,7 +192,7 @@ for specimen in species:
             label = rec.label
             rec_id = rec.id
             rec_segments, labels, rec_ids = load_pickled_segments_from_file(
-                siuts.training_segments_dir + fname + ".pickle", label, rec_id)
+                siuts.xeno_segments_dir + fname + ".pickle", label, rec_id)
             if len(rec_segments) > 0 and len(labels) > 0:
                 processed_segments = np.array(siuts.scale_segments(rec_segments))
 

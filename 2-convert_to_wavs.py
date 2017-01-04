@@ -8,8 +8,8 @@ import siuts
 from siuts import create_dir, Recording
 
 start = time.time()
-create_dir(siuts.training_wavs_dir)
-create_dir(siuts.testing_wavs_dir)
+create_dir(siuts.xeno_wavs_dir)
+create_dir(siuts.plutof_wavs_dir)
 
 print "Starting to convert training data to wav files"
 with open(siuts.data_dir + "training_recordings.pickle", "rb") as f:
@@ -24,7 +24,7 @@ for rec in recordings:
     if i%1000 == 0:
         print "{0}/{1} | {2}".format(i, recordings_count, str(datetime.datetime.now()))
     i += 1
-    file_path = "{0}{1}.wav".format(siuts.training_wavs_dir, rec.get_filename())
+    file_path = "{0}{1}.wav".format(siuts.xeno_wavs_dir, rec.get_filename())
     
     if not os.path.isfile(file_path) or os.stat(file_path).st_size == 0:
         try:
@@ -57,7 +57,7 @@ for rec in recordings:
     if i%100 == 0:
         print "{0}/{1} | {2}".format(i, recordings_count, str(datetime.datetime.now()))
         
-    file_path = "{0}{1}.wav".format(siuts.testing_wavs_dir, rec.get_filename())
+    file_path = "{0}{1}.wav".format(siuts.plutof_wavs_dir, rec.get_filename())
     i += 1
     if not os.path.isfile(file_path) or os.stat(file_path).st_size == 0:
         try:
