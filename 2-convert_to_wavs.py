@@ -13,7 +13,7 @@ def main():
     create_dir(siuts.plutof_wavs_dir)
 
     print "Starting to convert training data to wav files"
-    with open(siuts.data_dir + "training_recordings.pickle", "rb") as f:
+    with open(siuts.xeno_metadata_path, "rb") as f:
         recordings = pickle.load(f)
 
     recordings_count = len(recordings)
@@ -46,7 +46,7 @@ def main():
     start = time.time()
     print ""
     print "Starting to convert testing data to wav files"
-    with open(siuts.data_dir + "testing_recordings.pickle", "rb") as f:
+    with open(siuts.plutof_metadata_path, "rb") as f:
         recordings = pickle.load(f)
 
     recordings_count = len(recordings)

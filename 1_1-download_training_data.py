@@ -34,7 +34,7 @@ def main():
                 json_data = json.load(urllib2.urlopen(url + "&page=" + str(page)))
         all_recordings = all_recordings + recordings
 
-    with open(siuts.data_dir + "training_recordings.pickle", 'wb') as f:
+    with open(siuts.xeno_metadata_path, 'wb') as f:
         pickle.dump(all_recordings, f, protocol=-1)
     print "Finished downloading and saving training meta-data"
 

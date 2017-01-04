@@ -61,7 +61,7 @@ def main():
                     if counter % 10 == 0:
                         print "Downloaded {} files".format(counter)
 
-    with open(siuts.data_dir + "testing_recordings.pickle", 'wb') as f:
+    with open(siuts.plutof_metadata_path, 'wb') as f:
         pickle.dump(recordings, f, protocol=-1)
 
     print ""
