@@ -1,10 +1,8 @@
+import os
+import pickle
+import time
 import siuts
 from siuts import create_dir
-import time
-import pickle
-import os
-import numpy as np
-
 
 
 def segment_wavs(recordings_file, segments_dir, wavs_dir):
@@ -18,15 +16,12 @@ def segment_wavs(recordings_file, segments_dir, wavs_dir):
         if not os.path.isfile(pickle_path):
             wav_path = "{0}{1}.wav".format(wavs_dir, fname)
             if os.path.isfile(wav_path):
-                segments = segment_wav(wav_path)
+                segments = siuts.segment_wav(wav_path)
                 if len(segments) > 0:
                     with open(segments_dir + fname + ".pickle", 'wb') as f:
                         pickle.dump(segments, f, protocol=-1)
         if counter % 100 == 0:
             print "{0}/{1} file segmented".format(counter, recordings_count)
-
-
-
 
 
 print "Starting training data segmentation"
