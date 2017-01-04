@@ -24,12 +24,16 @@ def segment_wavs(recordings_file, segments_dir, wavs_dir):
             print "{0}/{1} file segmented".format(counter, recordings_count)
 
 
-print "Starting training data segmentation"
-start = time.time()
-segment_wavs(siuts.xeno_metadata_path, siuts.xeno_segments_dir, siuts.xeno_wavs_dir)
-print "Training data segmentation took {0} seconds".format(time.time() - start)
+def main():
+    print "Starting training data segmentation"
+    start = time.time()
+    segment_wavs(siuts.xeno_metadata_path, siuts.xeno_segments_dir, siuts.xeno_wavs_dir)
+    print "Training data segmentation took {0} seconds".format(time.time() - start)
 
-print "Starting testing segmentation"
-start = time.time()
-segment_wavs(siuts.plutof_metadata_path, siuts.plutof_segments_dir, siuts.plutof_wavs_dir)
-print "Testing data segmentation took {0} seconds".format(time.time() - start)
+    print "Starting testing segmentation"
+    start = time.time()
+    segment_wavs(siuts.plutof_metadata_path, siuts.plutof_segments_dir, siuts.plutof_wavs_dir)
+    print "Testing data segmentation took {0} seconds".format(time.time() - start)
+
+if __name__ == "__main__":
+    main()

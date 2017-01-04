@@ -25,7 +25,6 @@ def main():
     number_of_pages = int(math.ceil(float(json_data["collection"]["count"]) / 100))
 
     print "Starting to download audio recordings"
-    print ""
 
     for page in range(1, number_of_pages + 1):
         json_data = json.load(urllib2.urlopen(url.format(page)))
