@@ -1,6 +1,5 @@
 import time
 import siuts
-from siuts import create_dir
 from os import listdir
 from os.path import isfile, join
 import pickle
@@ -8,6 +7,7 @@ import numpy as np
 import warnings
 import sklearn.utils.validation
 import random
+
 import operator
 
 warnings.simplefilter('ignore', sklearn.utils.validation.DataConversionWarning)
@@ -102,7 +102,7 @@ def main():
         valid_recordings = valid_recordings + sp_valid_recordings
         test_recordings = test_recordings + sp_test_recordings
 
-    siuts.create_dir(create_dir(siuts.dataset_dir))
+    siuts.create_dir(siuts.dataset_dir)
 
     training_segments_dir = siuts.xeno_segments_dir
     testing_segments_dir = siuts.plutof_segments_dir
@@ -229,6 +229,7 @@ def main():
                 pickle.dump(np.array(all_rec_ids), f, protocol=-1)
 
     print "Joining training segments took {0} seconds".format(time.time() - start)
+
 
 if __name__ == "__main__":
     main()

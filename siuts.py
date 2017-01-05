@@ -177,7 +177,7 @@ def scale_segments(segments):
     segment_count = len(segments)
     segments = np.reshape(segments, (segment_count, segment_size1 * segment_size2))
     scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True)
-    return scaled_segments.reshape(segment_count, segment_size1, segment_size2).tolist()
+    return scaled_segments.reshape(segment_count, segment_size1, segment_size2, 1).tolist()
 
 
 def segment_wav(wav_path):
