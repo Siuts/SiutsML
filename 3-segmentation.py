@@ -7,8 +7,7 @@ from siuts import create_dir
 
 def segment_wavs(recordings_file, segments_dir, wavs_dir):
     create_dir(segments_dir)
-    with open(recordings_file, "rb") as f:
-        recordings = pickle.load(f)
+    recordings = siuts.load(recordings_file)
     recordings_count = len(recordings)
     for counter, rec in enumerate(recordings):
         fname = rec.get_filename()
@@ -18,7 +17,7 @@ def segment_wavs(recordings_file, segments_dir, wavs_dir):
             if os.path.isfile(wav_path):
                 segments = siuts.segment_wav(wav_path)
                 if len(segments) > 0:
-                    with open(segments_dir + fname + ".pickle", 'wb') as f:
+                    with open(pickle_path, 'wb') as f:
                         pickle.dump(segments, f, protocol=-1)
         if counter % 100 == 0:
             print "{0}/{1} file segmented".format(counter, recordings_count)

@@ -14,8 +14,7 @@ warnings.simplefilter('ignore', sklearn.utils.validation.DataConversionWarning)
 
 
 def load_pickled_segments_from_file(filename, label, rec_id):
-    with open(filename, 'rb') as f:
-        segments = pickle.load(f)
+    segments = siuts.load(filename)
     segments_number = len(segments)
 
     if segments_number == 0:
@@ -71,15 +70,13 @@ def join_segments(selected_recordings, segments_dir, data_filepath, labels_filep
 
 
 def main():
-    # count segments for each recording in testing data
-    with open(siuts.plutof_metadata_path, "rb") as f:
-        plutof_recordings = pickle.load(f)
+    plutof_recordings = siuts.load(siuts.plutof_metadata_path)
 
+    # count segments for each recording in testing data
     for rec in plutof_recordings:
         segments_path = siuts.plutof_segments_dir + rec.get_filename() + ".pickle"
         if isfile(segments_path):
-            with open(segments_path, "rb") as f:
-                rec.segments_count = len(pickle.load(f))
+            rec.segments_count = len(siuts.load(segments_path))
 
     # separate testing and validation dataset
     valid_recordings = []
@@ -144,16 +141,14 @@ def main():
     train_filenames = [x.split(".")[0] for x in listdir(training_segments_dir) if
                        isfile(join(training_segments_dir, x))]
     species = siuts.species_list
-    with open(siuts.xeno_metadata_path, "rb") as f:
-        training_recordings = pickle.load(f)
+    training_recordings = siuts.load(siuts.xeno_metadata_path)
     for specimen in species:
         specimen_files = [x for x in training_recordings if
                           x.get_name() == specimen and x.get_filename() in train_filenames]
         species_files_count[specimen] = len(specimen_files)
         for rec in specimen_files:
             fname = rec.get_filename()
-            with open(siuts.xeno_segments_dir + fname + ".pickle", 'rb') as f:
-                segs = pickle.load(f)
+            segs = siuts.load(siuts.xeno_segments_dir + fname + ".pickle")
             if specimen in species_segments_count:
                 species_segments_count[specimen] += len(segs)
             else:
@@ -162,7 +157,6 @@ def main():
             max_segments = species_segments_count[specimen]
     print "Species files count"
     print species_files_count
-    print
 
     print "Species segments count:"
     print species_segments_count
@@ -171,6 +165,7 @@ def main():
     print "Max segments for species: " + str(max_segments)
     print
 
+    # join training segments
     for specimen in species:
         print ""
         print "Joining training segments for {}".format(specimen)
@@ -187,6 +182,7 @@ def main():
         rec_ids_fname = filepath_prefix + "rec_ids.pickle"
         rec_segments, labels, rec_ids = [], [], []
         if not (isfile(labels_fname) and isfile(rec_ids_fname)):
+            processed_segments = []
             for counter, rec in enumerate(specimen_files):
                 fname = rec.get_filename()
                 label = rec.label
@@ -212,12 +208,15 @@ def main():
 
             random.shuffle(all_segments)
             nr_samples = len(all_segments)
+            # duplicating data in minority classes
             if nr_samples < max_segments:
                 data_to_append = np.copy(all_segments)
                 for j in range(int(np.floor(max_segments / nr_samples)) - 1):
                     all_segments = np.concatenate((all_segments, data_to_append))
                 all_segments = np.concatenate((all_segments, data_to_append[:(max_segments - len(all_segments))]))
             nr_of_files = int(np.ceil(float(max_segments) / siuts.samples_in_file))
+
+            # save segments into splitted files
             for i in range(nr_of_files):
                 with open("{0}/{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, i), 'wb') as f:
                     pickle.dump(all_segments[i * siuts.samples_in_file:(i + 1) * siuts.samples_in_file], f, protocol=-1)

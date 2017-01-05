@@ -5,6 +5,7 @@ import numpy as np
 from numpy.lib import stride_tricks
 from sklearn.preprocessing import scale
 import scipy.misc
+import pickle
 
 #
 # General settings for selecting species and pre-processing properties
@@ -28,11 +29,13 @@ acceptable_quality = ["A", "B"]
 # Sample rate of the wave files
 wav_framerate = 22050
 
+# Frame size of the Fourier transform
 fft_frame_size = 512
 
 # Final segment size
 resized_segment_size = 64
 
+# Batch size in valuation phase
 test_batch_size = 32
 
 # How many samples of training data in one file. If lower than 16GB of RAM, a lower number should be used
@@ -47,9 +50,9 @@ data_dir = "data/"
 xeno_dir = data_dir + "xeno_recordings/"
 # Directory where PlutoF audio file are downloade
 plutoF_dir = data_dir + "plutof_recordings/"
-# Filepath to the meta-data of xeno-canto recordings
+# File path to the meta-data of xeno-canto recordings
 xeno_metadata_path = data_dir + "xeno_metadata.pickle"
-# Filepath to the meta-data of PlutoF recordings
+# File path to the meta-data of PlutoF recordings
 plutof_metadata_path = data_dir + "plutof_metadata.pickle"
 # Directory where xeno-canto converted WAV files are saved
 xeno_wavs_dir = data_dir + "xeno_wavs/"
@@ -62,18 +65,25 @@ plutof_segments_dir = data_dir + "plutof_segments/"
 
 # Directory where the input files for training and evaluation are saved
 dataset_dir = data_dir + "dataset/"
-# Filepath to the joined testing segments
+# File path to the joined testing segments
 testing_data_filepath = dataset_dir + "testing_data.pickle"
-# Filepath to the joined testing labels
+# File path to the joined testing labels
 testing_labels_filepath = dataset_dir + "testing_labels.pickle"
-# Filepath to the joined testing recording id's
+# File path to the joined testing recording id's
 testing_rec_ids_filepath = dataset_dir + "testing_rec_ids.pickle"
-# Filepath to the joined validation segments
+# File path to the joined validation segments
 validation_data_filepath = dataset_dir + "validation_data.pickle"
-# Filepath to the joined validation labels
+# File path to the joined validation labels
 validation_labels_filepath = dataset_dir + "validation_labels.pickle"
-# Filepath to the joined validation recording id's
+# File path to the joined validation recording id's
 validation_rec_ids_filepath = dataset_dir + "validation_rec_ids.pickle"
+
+# Directory where graph and checkpoint files are saved
+checkpoints_dir = "checkpoints/"
+# Directory where frozen graphs are located
+frozen_graphs_dir = checkpoints_dir + "frozen_graphs/"
+# File path to the accuracies objects for each step, where checkpoint was saved
+accuracies_filepath = checkpoints_dir + "accuracies.pickle"
 
 
 class Recording:
@@ -184,3 +194,17 @@ def segment_wav(wav_path):
                                                   interp='nearest')
             segments.append(resized_segment)
     return segments
+
+
+def load(location):
+    with open(location, 'rb') as opened_file:
+        return pickle.load(opened_file)
+
+
+def reformat_labels(labels):
+    labels = (np.arange(len(species_list)) == labels[:, None]).astype(np.float32)
+    return np.array(labels)
+
+
+def accuracy(predictions, labels):
+    return float((100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) / len(predictions)))
