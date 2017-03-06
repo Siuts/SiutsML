@@ -52,7 +52,7 @@ def get_accuracies(graph_path, validation_data, validation_labels, recording_ids
                                                       return_elements=['sm_test:0'])
 
         testing_predictions = np.empty
-        for i in range(validation_data.shape[0] / siuts.test_batch_size):
+        for i in range(int(validation_data.shape[0] / siuts.test_batch_size)):
             start = i * siuts.test_batch_size
             end = (i + 1) * siuts.test_batch_size
             if i == 0:
@@ -129,13 +129,15 @@ def get_accuracies(graph_path, validation_data, validation_labels, recording_ids
 
 def main():
     data = siuts.load(siuts.validation_data_filepath)
+    shape = np.shape(data)
+    data = np.reshape(data, (shape[0], shape[1], shape[2], 1))
     labels = siuts.reformat_labels(siuts.load(siuts.validation_labels_filepath))
     rec_ids = siuts.load(siuts.validation_rec_ids_filepath)
     output_path = siuts.frozen_graphs_dir + "frozen_graph-{}.pb"
     accuracies_list = []
     for checkpoint in tf.train.get_checkpoint_state(siuts.checkpoints_dir).all_model_checkpoint_paths:
         step = checkpoint.split("-")[1]
-        print "Evaluating for step {0}".format(step)
+        print("Evaluating for step {0}".format(step))
         freeze_graph.freeze_graph(input_graph, input_saver, input_binary, checkpoint, output_node_names,
                                   restore_op_name, filename_tensor_name, output_path.format(step), clear_devices,
                                   initializer_nodes)
@@ -146,30 +148,30 @@ def main():
     with open(siuts.accuracies_filepath, 'wb') as f:
         pickle.dump(accuracies_list, f, protocol=-1)
 
-    print
-    print "Highest segments level F1 scores"
+    print()
+    print("Highest segments level F1 scores")
     accuracies_list.sort(key=operator.attrgetter('seg_f1'), reverse=True)
     for acc in accuracies_list[:nr_in_mean]:
-        print "{:6} {:1.4f} ".format(acc.step, acc.seg_f1)
-    print "Mean of {0} segment level F1 scores: {1}".format(nr_in_mean,
-                                                            np.mean([x.seg_f1 for x in accuracies_list[:nr_in_mean]]))
+        print("{:6} {:1.4f} ".format(acc.step, acc.seg_f1))
+    print("Mean of {0} segment level F1 scores: {1}".format(nr_in_mean,
+                                                            np.mean([x.seg_f1 for x in accuracies_list[:nr_in_mean]])))
 
-    print
-    print "Highest recording level F1 scores:"
+    print()
+    print("Highest recording level F1 scores:")
     accuracies_list.sort(key=operator.attrgetter('file_f1'), reverse=True)
     for acc in accuracies_list[:nr_in_mean]:
-        print "{:6} {:1.4f} ".format(acc.step, acc.file_f1)
-    print "Mean of {0} file level F1 scores: {1}".format(nr_in_mean,
-                                                         np.mean([x.file_f1 for x in accuracies_list[:nr_in_mean]]))
+        print("{:6} {:1.4f} ".format(acc.step, acc.file_f1))
+    print("Mean of {0} file level F1 scores: {1}".format(nr_in_mean,
+                                                         np.mean([x.file_f1 for x in accuracies_list[:nr_in_mean]])))
 
-    print
-    print "Highest top 3 accuracies"
+    print()
+    print("Highest top 3 accuracies")
     accuracies_list.sort(key=operator.attrgetter('top3_acc'), reverse=True)
     for acc in accuracies_list[:nr_in_mean]:
-        print "{:6} {:1.4f} ".format(acc.step, acc.top3_acc)
-    print "Mean of {0} highest top-3 accuracies: {1}".format(nr_in_mean, np.mean(
-        [x.top3_acc for x in accuracies_list[:nr_in_mean]]))
-    print
+        print("{:6} {:1.4f} ".format(acc.step, acc.top3_acc))
+    print("Mean of {0} highest top-3 accuracies: {1}".format(nr_in_mean, np.mean(
+        [x.top3_acc for x in accuracies_list[:nr_in_mean]])))
+    print()
 
 
 if __name__ == "__main__":

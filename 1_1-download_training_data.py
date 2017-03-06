@@ -1,6 +1,5 @@
 import json
-import urllib2
-import urllib
+import urllib.request
 import pickle
 import os
 import siuts
@@ -18,7 +17,7 @@ def main():
         genus = species_split[0]
         species = species_split[1]
         url = "http://www.xeno-canto.org/api/2/recordings?query={0}%20{1}".format(genus, species)
-        json_data = json.load(urllib2.urlopen(url))
+        json_data = json.load(urllib.request.urlopen(url))
         recordings = []
 
         # if data is divided to several pages, then include them all
@@ -31,12 +30,12 @@ def main():
             recordings = recordings + quality_recordings
             page += 1
             if int(json_data["numPages"]) - page >= 0:
-                json_data = json.load(urllib2.urlopen(url + "&page=" + str(page)))
+                json_data = json.load(urllib.request.urlopen(url + "&page=" + str(page)))
         all_recordings = all_recordings + recordings
 
     with open(siuts.xeno_metadata_path, 'wb') as f:
         pickle.dump(all_recordings, f, protocol=-1)
-    print "Finished downloading and saving training meta-data"
+    print("Finished downloading and saving training meta-data")
 
     path = siuts.xeno_dir
     create_dir(path)
@@ -47,10 +46,10 @@ def main():
         file_path = path + rec.get_filename() + ".mp3"
         i += 1
         if i % 100 == 0:
-            print "{0}/{1} downloaded".format(i, recordings_count)
+            print("{0}/{1} downloaded".format(i, recordings_count))
 
         if not os.path.isfile(file_path) or os.stat(file_path).st_size == 0:
-            urllib.urlretrieve(rec.file_url, file_path)
+            urllib.request.urlretrieve(rec.file_url, file_path)
 
 
 if __name__ == "__main__":

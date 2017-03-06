@@ -2,11 +2,11 @@ import sys
 import time
 import numpy as np
 import tensorflow as tf
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 import siuts
 import glob
 
-num_epochs = 4
+num_epochs = 2
 batch_size = 128
 
 
@@ -16,6 +16,7 @@ def main():
     num_labels = len(siuts.species_list)
     image_size = siuts.resized_segment_size
     num_files = len(glob.glob1(siuts.dataset_dir, "{}-training*".format(siuts.species_list[0])))
+    num_files = 3
 
     graph = tf.Graph()
     with graph.as_default():
@@ -49,20 +50,20 @@ def main():
         def model(data, input_dropout, fc_dropout):
             data = tf.nn.dropout(data, input_dropout)
             # Conv1
-            print data
+            print(data)
             conv = conv2d("conv1", data, [5, 5, 1, 32], [32], 2)
             pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
-            print pool
+            print(pool)
 
             # Conv2
             conv = conv2d("conv2", pool, [5, 5, 32, 64], [64])
             pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool2')
-            print pool
+            print(pool)
 
             # Conv3
             conv = conv2d("conv3", pool, [3, 3, 64, 128], [128])
             pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool3')
-            print pool
+            print(pool)
 
             # Fully connected 1
             shape = pool.get_shape().as_list()
@@ -78,8 +79,8 @@ def main():
 
         logits = model(tf_train_dataset, 1, 0.8)
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits + 1e-50, tf_train_labels))
-        optimizer = tf.train.MomentumOptimizer(0.0005, 0.95, use_locking=False, name='Momentum',
+            tf.nn.softmax_cross_entropy_with_logits(logits=(logits + 1e-50), labels=tf_train_labels))
+        optimizer = tf.train.MomentumOptimizer(0.0001, 0.95, use_locking=False, name='Momentum',
                                                use_nesterov=True).minimize(loss)
 
         tf.get_variable_scope().reuse_variables()
@@ -115,7 +116,7 @@ def main():
                 train_labels = np.empty
                 for specimen in siuts.species_list:
                     new_data = siuts.load(
-                        "{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, current_file))
+                        "{0}{1}-training_{2}.pickle".format(siuts.standardized_dataset_dir, specimen, current_file))
                     new_labels = np.empty(new_data.shape[0])
                     new_labels.fill(siuts.species_list.index(specimen))
                     if counter == 0:
@@ -129,13 +130,15 @@ def main():
                     sys.stdout.write(".")
                     sys.stdout.flush()
 
-                print
+                print()
                 current_file += 1
                 if current_file >= num_files - 1:
                     current_file = 0
                     current_epoch += 1
                 train_dataset, _, train_labels, _ = train_test_split(train_dataset, siuts.reformat_labels(train_labels),
                                                                      test_size=0, random_state=1337)
+                shape = np.shape(train_dataset)
+                train_dataset = np.reshape(train_dataset, (shape[0], shape[1], shape[2], 1))
             offset = (step * batch_size) % (num_labels * siuts.samples_in_file - batch_size)
             sys.stdout.write(".")
             sys.stdout.flush()
@@ -151,12 +154,12 @@ def main():
                 if step % 250 == 0:
                     saver.save(session, checkpoint_path, global_step=step)
 
-                print '%d - Minibatch loss: %f | Minibatch accuracy: %.1f%%' % (step, l, batch_acc)
+                print('%d - Minibatch loss: %f | Minibatch accuracy: %.1f%%' % (step, l, batch_acc))
             step += 1
 
         saver.save(session, checkpoint_path, global_step=step)
 
-    print "Training took " + str(time.time() - start) + " seconds"
+    print("Training took " + str(time.time() - start) + " seconds")
 
 
 if __name__ == "__main__":

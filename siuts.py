@@ -1,11 +1,11 @@
 import os
 import wave
-import pylab
 import numpy as np
 from numpy.lib import stride_tricks
-from sklearn.preprocessing import scale
+#from sklearn.preprocessing import scale
 import scipy.misc
 import pickle
+import multiprocessing
 
 #
 # General settings for selecting species and pre-processing properties
@@ -42,7 +42,7 @@ test_batch_size = 32
 samples_in_file = 4096
 
 # Overlap by half of the segment size when performing segmentation
-segmentation_hop_size = fft_frame_size / 4
+segmentation_hop_size = int(fft_frame_size / 4)	
 
 # Directory path containing audio files, segments, etc...
 data_dir = "data/"
@@ -65,6 +65,9 @@ plutof_segments_dir = data_dir + "plutof_segments/"
 
 # Directory where the input files for training and evaluation are saved
 dataset_dir = data_dir + "dataset/"
+
+standardized_dataset_dir = data_dir + "standardized_dataset/"
+
 # File path to the joined testing segments
 testing_data_filepath = dataset_dir + "testing_data.pickle"
 # File path to the joined testing labels
@@ -124,6 +127,19 @@ class Accuracy:
     top3_acc = None
 
 
+class Counter(object):
+    def __init__(self):
+        self.val = multiprocessing.Value('i', 0)
+
+    def increment(self, n=1):
+        with self.val.get_lock():
+            self.val.value += n
+
+    @property
+    def value(self):
+        return self.val.value
+
+
 def create_dir(path):
     (dirname, _) = os.path.split(path)
     if not os.path.isdir(dirname):
@@ -133,7 +149,7 @@ def create_dir(path):
 def get_wav_info(wav_file):
     wav = wave.open(wav_file, 'r')
     frames = wav.readframes(-1)
-    sound_info = pylab.fromstring(frames, 'Int16')
+    sound_info = np.fromstring(frames, 'Int16')
     frame_rate = wav.getframerate()
     wav.close()
     return sound_info, frame_rate
@@ -146,7 +162,7 @@ def stft(sig, frame_size, overlap_fac=0.5, window=np.hanning):
     # zeros at beginning (thus center of 1st window should be for sample nr. 0)
     samples = np.append(np.zeros(int(np.floor(frame_size / 2.0))), sig)
     # cols for windowing
-    cols = np.ceil((len(samples) - frame_size) / float(hop_size)) + 1
+    cols = int(np.ceil((len(samples) - frame_size) / float(hop_size)) + 1)
 
     samples = np.append(samples, np.zeros(frame_size))
 
@@ -176,22 +192,52 @@ def scale_segments(segments):
     segment_size2 = len(segments[0][0])
     segment_count = len(segments)
     segments = np.reshape(segments, (segment_count, segment_size1 * segment_size2))
-    scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True)
+    raise NotImplementedError()
+    # scaled_segments = scale(segments, axis=1, with_mean=True, with_std=True, copy=True)
     return scaled_segments.reshape(segment_count, segment_size1, segment_size2, 1).tolist()
+
+
+def minmax_scale(segments):
+    Xmax = np.max(segments)
+    Xmin = np.min(segments)
+    new_segments = []
+    for segment in segments:
+        new_segment = []
+        for row in segment:
+            new_row = []
+            for x in row:
+                new_row.append((x-Xmin)/(Xmax-Xmin))
+            new_segment.append(new_row)
+        new_segments.append(new_segment)
+    return new_segments
+
+
+def downscale(matrix, m):
+    new_width = int(len(matrix)/m)
+    new_height = int(len(matrix[0])/m)
+    new_matrix = []
+    for row_idx in range(new_width):
+        row = []
+        for col_idx in range(new_height):
+            points = []
+            for row_shift in range(m):
+                for col_shift in range(m):
+                    points.append(matrix[m*row_idx+row_shift][m*col_idx+col_shift])
+            row.append(np.mean(points))
+        new_matrix.append(row)
+    return new_matrix
 
 
 def segment_wav(wav_path):
     signal, fs = get_wav_info(wav_path)
-    transposed_spectrogram = abs(stft(signal, fft_frame_size))[:, :fft_frame_size / 2]
+    transposed_spectrogram = abs(stft(signal, fft_frame_size))[:, :int(fft_frame_size / 2)]
     cleaned_spectrogram = clean_spectrogram(transposed_spectrogram)
     segments = []
     if cleaned_spectrogram.shape[0] > fft_frame_size / 2:
         for i in range(int(np.floor(cleaned_spectrogram.shape[0] / segmentation_hop_size - 1))):
             segment = cleaned_spectrogram[
                       i * segmentation_hop_size:i * segmentation_hop_size + cleaned_spectrogram.shape[1]]
-            resized_segment = scipy.misc.imresize(segment,
-                                                  (resized_segment_size, resized_segment_size),
-                                                  interp='nearest')
+            resized_segment = downscale(segment, 4)
             segments.append(resized_segment)
     return segments
 

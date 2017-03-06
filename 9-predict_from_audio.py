@@ -17,7 +17,7 @@ def reshape_segments(segments):
 
 def main(wav_path, graph_path="siuts_model.pb"):
     if not os.path.isfile(graph_path):
-        print "No model file found. Please specify trained model path as a second command line argument"
+        print("No model file found. Please specify trained model path as a second command line argument")
         return
 
     segments = reshape_segments(siuts.segment_wav(wav_path))
@@ -40,18 +40,18 @@ def main(wav_path, graph_path="siuts_model.pb"):
                     feed_dict={tf_sample: [segments[i]]})))
 
     first_predictions = np.argmax(predictions, 1)
-    print "Prediction for each segment:"
+    print("Prediction for each segment:")
     for i, prediction in enumerate(first_predictions):
-        print "{:^25} ({:05.2f}%)".format(siuts.species_list[prediction].replace("_", " "), max(predictions[i]) * 100)
+        print("{:^25} ({:05.2f}%)".format(siuts.species_list[prediction].replace("_", " "), max(predictions[i]) * 100))
 
     averaged_predictions = np.mean(predictions, axis=0)
     predictions_dict = {}
     for i, prediction in enumerate(averaged_predictions):
         predictions_dict[siuts.species_list[i]] = prediction
-    print
-    print "Predictions:"
+    print()
+    print("Predictions:")
     for species, probability in sorted(predictions_dict.items(), key=itemgetter(1), reverse=True):
-        print "{:^25} ({:05.2f}%)".format(species.replace("_", " "), probability * 100)
+        print("{:^25} ({:05.2f}%)".format(species.replace("_", " "), probability * 100))
 
 
 if __name__ == "__main__":
@@ -60,4 +60,4 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1:
         main(sys.argv[1])
     else:
-        print "You have to add path to the *.wav file as a command line argument"
+        print("You have to add path to the *.wav file as a command line argument")
