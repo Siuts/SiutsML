@@ -42,62 +42,54 @@ class RunningStats:
         return math.sqrt(self.variance())
 
 def main():
+    siuts.create_dir(siuts.standardized_dataset_dir)
     start_time = time.time()
-    # current_file = 0
-    # rs = RunningStats()
-    # # first pass for finding mean over all training data and total segments count
-    # while isfile("{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, siuts.species_list[0], current_file)):
-    #     print()
-    #     for specimen in siuts.species_list:
-    #         path = "{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, current_file)
-    #         print("{} | {}".format(current_file, specimen))
-    #         segments = siuts.load(path)
-    #         for segment in segments:
-    #             for row in segment:
-    #                 for pixel in row:
-    #                     rs.push(float(pixel))
-    #     current_file += 1
-    # print("Finding stats took " + str(time.time() - start_time) + " seconds")
-    #
-    # mean = rs.mean()
-    # std = rs.standard_deviation()
+    current_file = 0
+    rs = RunningStats()
+    
+    while isfile("{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, siuts.species_list[0], current_file)):
+        print()
+        for specimen in siuts.species_list:
+            path = "{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, current_file)
+            print("{} | {}".format(current_file, specimen))
+            segments = siuts.load(path)
+            for segment in segments:
+                for row in segment:
+                    for pixel in row:
+                        rs.push(float(pixel))
+        current_file += 1
+    print("Finding stats took " + str(time.time() - start_time) + " seconds")
+    mean = rs.mean()
+    std = rs.standard_deviation()
 
-
-    mean=0.011952773077132257
-    std=0.039717425936939284
-    current_file = 14
-
-    # stats = {"mean": mean, "std": std}
-    #
-    # print("mean={}".format(mean))
-    # print("std={}".format(std))
-    #
-    # with open(siuts.data_dir + "stats.json", 'w') as f:
-    #     json.dump(stats, f)
-    #
-    # nr_of_files = current_file
-    # current_file = 0
-    #
-    # while current_file < nr_of_files:
-    #     print()
-    #     for specimen in siuts.species_list:
-    #         path = "{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, current_file)
-    #         print("{} | {}".format(current_file, specimen))
-    #         segments = siuts.load(path)
-    #         standardized_segments = []
-    #         for segment in segments:
-    #             standardized_segment = []
-    #             for row in segment:
-    #                 standardized_row = []
-    #                 for x in row:
-    #                     standardized_row.append((x-mean)/std)
-    #                 standardized_segment.append(standardized_row)
-    #             standardized_segments.append(standardized_segment)
-    #
-    #         with open("{0}{1}-training_{2}.pickle".format(siuts.standardized_dataset_dir, specimen, current_file), 'wb') as f:
-    #             pickle.dump(np.array(standardized_segments, dtype=np.float16), f, protocol=-1)
-    #     current_file += 1
-    #
+    stats =  {"mean": mean, "std": std}
+    
+    print("mean={}".format(mean))
+    print("std={}".format(std))
+    with open(siuts.data_dir + "stats.json", 'w') as f:
+        json.dump(stats, f)
+    nr_of_files = current_file
+    current_file = 0
+    
+    while current_file < nr_of_files:
+        print()
+        for specimen in siuts.species_list:
+            path = "{0}{1}-training_{2}.pickle".format(siuts.dataset_dir, specimen, current_file)
+            print("{} | {}".format(current_file, specimen))
+            segments = siuts.load(path)
+            standardized_segments = []
+            for segment in segments:
+                standardized_segment = []
+                for row in segment:
+                    standardized_row = []
+                    for x in row:
+                        standardized_row.append((x-mean)/std)
+                    standardized_segment.append(standardized_row)
+                standardized_segments.append(standardized_segment)
+    	    with open("{0}{1}-training_{2}.pickle".format(siuts.standardized_dataset_dir, specimen, current_file), 'wb') as f:
+                pickle.dump(np.array(standardized_segments, dtype=np.float16), f, protocol=-1)
+        current_file += 1
+    
     print("Standardizing testing data")
     standardize_pickled_segments("testing", mean, std)
 
